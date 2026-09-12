@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  # 1. Message Broker (Sistem Syaraf Pusat)
+  mosquitto:
+    image: eclipse-mosquitto:2.0
+    container_name: lindu_broker
+    restart: unless-stopped
+    ports:
+      - "1883:1883"
+      - "9001:9001" # Port WebSockets untuk Web Dashboard
+      - "8883:8883" # Port untuk TLS (Nantinya)
+    volumes:
+      - ./mosquitto/config/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - mosquitto_data:/mosquitto/data
+      - mosquitto_log:/mosquitto/log
+
+  # 2. Database Time-Series (Penyimpan Memori Gempa Jangka Panjang)
+  timescaledb:
+    image: timescale/timescaledb:latest-pg15
+    container_name: lindu_db
+    restart: always
+    environment:
+      POSTGRES_USER: lindu_admin
+      POSTGRES_PASSWORD: supersecretpassword
+      POSTGRES_DB: lindudb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  # 3. Otak Pusat (Validasi Kecepatan Rambat & Konsensus)
+  consensus_engine:
+    build: ./src/server
+    container_name: lindu_consensus
+    restart: always
+    ports:
+      - "5050:5000"
+    volumes:
+      - ./src/server:/app
+    environment:
+      - TZ=Asia/Jakarta
+      - MQTT_BROKER=mosquitto
+      - MQTT_PORT=1883
+      - DB_HOST=timescaledb
+      - DB_USER=lindu_admin
+      - DB_PASS=supersecretpassword
+      - DB_NAME=lindudb
+    depends_on:
+      - mosquitto
+      - timescaledb
+
+  # 4. Web Server (Menyajikan Dashboard UI secara statis)
+  dashboard_ui:
+    image: nginx:alpine
+    container_name: lindu_dashboard
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./src/dashboard-react/dist:/usr/share/nginx/html:ro
+
+volumes:
+  mosquitto_data:
+  mosquitto_log:
+  pgdata:
