@@ -1,38 +1,97 @@
-# Lindu.id - IoT Earthquake Early Warning System (EEWS)
+# 🌋 Lindu-EEW (Earthquake Early Warning System)
 
-Proyek Tesis S2 IoT - Sistem Peringatan Dini Gempa Berbasis Jaringan Sensor Terdistribusi (Edge Computing) dan WebSockets.
+Selamat datang di repositori utama **Lindu-EEW**, sebuah sistem pendeteksi gempa bumi desentralisasi berbasis *Internet of Things* (IoT) dengan algoritma konsensus P-Wave.
 
-## Status Sistem (Versi 2.0 - COMMAND CENTER)
-Sistem ini telah dimutakhirkan secara menyeluruh. Versi saat ini menggunakan arsitektur *Enterprise-Grade*:
-* **Backend (Konsensus & API):** Python Paho MQTT + Flask REST API. Menggunakan Algoritma Konsensus Fisika (P-Wave Velocity) dan *Center of Energy Refinement*.
-* **Broker:** Eclipse Mosquitto (Protokol WebSockets untuk aliran data *Real-Time*).
-* **Database:** PostgreSQL / TimescaleDB (Menyimpan log sejarah sensor dan gempa).
-* **Frontend:** Dasbor (Command Center) menggunakan **React + Vite** + Tailwind CSS v4 + Leaflet. Di-*serve* via Docker Nginx.
-* **Sensor Nodes:** C++ (PlatformIO) untuk perangkat fisik ESP32.
+Sistem ini terdiri dari 3 komponen utama (submodules):
+1. **ESP32 Sensor Node** (`src/esp32_sensor_node`)
+2. **Consensus Server & API** (`src/server`)
+3. **Grafana & Data Stack** (`prototype/grafana-stack`)
 
-## Struktur Direktori Utama
-* `src/server/` : Mesin Konsensus Python (`consensus.py`) dan Simulator Gempa Ekstrem 23-Node (`simulate_e2e.py`).
-* `src/dashboard-react/` : Source code Dasbor React. Hasil kompilasi (`dist`) disajikan langsung oleh Nginx.
-* `src/esp32_sensor_node/` & `src/esp32_actuator_node/` : Kode sumber mikrokontroler (Tahap selanjutnya).
+---
 
-## Panduan Menjalankan Sistem
+## 📋 Daftar Isi
+1. [Kebutuhan Perangkat Keras](#1-kebutuhan-perangkat-keras)
+2. [Instalasi Server (Docker & Grafana)](#2-instalasi-server-docker--grafana)
+3. [Instalasi ESP32 Node (Firmware)](#3-instalasi-esp32-node-firmware)
+4. [Menjalankan Mesin Konsensus](#4-menjalankan-mesin-konsensus)
+5. [Panduan Operasional & Command Center](#5-panduan-operasional--command-center)
 
-Seluruh arsitektur kini telah dibungkus ke dalam **Docker Compose**. Anda tidak perlu lagi menjalankan skrip peladen secara manual.
+---
 
-1. **Jalankan Seluruh Infrastruktur (Backend, Frontend, DB, Broker):**
+## 1. Kebutuhan Perangkat Keras
+Setiap Node Lindu membutuhkan komponen berikut:
+* **Microcontroller:** ESP32-S3 (atau ESP32 varian standar)
+* **Sensor Seismik:** LSM6DS3 (I2C)
+* **Sensor Cuaca:** BME280 / BMP280 (I2C)
+* **Aktuator:** LED, Buzzer (Active-Low), dan Motor Servo (opsional)
+
+**Skema Kabel (Wiring I2C - ESP32-S3):**
+* `SDA` -> GPIO 10
+* `SCL` -> GPIO 11
+* `Buzzer` -> GPIO 15
+* `LED` -> GPIO 16
+
+---
+
+## 2. Instalasi Server (Docker & Grafana)
+Sistem *backend* sangat mudah di-deploy menggunakan Docker.
+
+1. **Masuk ke folder Grafana Stack:**
    ```bash
-   docker-compose up -d --build
+   cd prototype/grafana-stack
    ```
-   *Dashboard kini bisa diakses di **http://localhost/** secara otomatis (tanpa perlu npm run dev).*
-
-2. **Jalankan Simulasi Uji Coba Gempa (Megathrust Kanto 23-Node):**
-   Buka terminal, dan tembakkan skenario simulasi:
+2. **Jalankan Docker Compose:**
    ```bash
-   python3 src/server/simulate_e2e.py
+   docker-compose up -d
    ```
+3. **Akses Dashboard Grafana:**
+   * Buka browser ke `http://localhost:3000`
+   * Dashboard **"Seismic Monitor"** sudah terkonfigurasi secara otomatis (lengkap dengan Peta Geografis dan *Command Center*).
+   * MQTT Broker otomatis berjalan di port `1883`.
 
-## Fitur Unggulan (React Refactor)
-* **Hybrid Data Fetching:** Saat baru dimuat, Dasbor menarik riwayat gempa melalui **REST API (Port 5050)** dari PostgreSQL. Setelah itu, Dasbor murni mengandalkan **WebSockets (Port 9001)** untuk latensi nol milidetik.
-* **Geospatial Intelligence:** Peta secara gaib mendeteksi lokasi asali (Tokyo/Jakarta). Titik biru merepresentasikan seluruh *nodes* sensor historis maupun yang sedang aktif.
-* **Massive Node UI:** Mendukung hingga puluhan sensor (20+) secara bersamaan tanpa merusak *layout* (*overflow-y-auto* dan Chart.js dinamis).
-* **Silent Mode:** Gempa di luar radius bahaya tidak akan memunculkan spanduk merah yang mengganggu, melainkan hanya masuk ke daftar riwayat secara senyap.
+---
+
+## 3. Instalasi ESP32 Node (Firmware)
+
+1. **Flash Firmware via PlatformIO:**
+   Buka folder `src/esp32_sensor_node` menggunakan VSCode + PlatformIO, lalu klik tombol **Upload**.
+
+2. **Konfigurasi Awal (Captive Portal):**
+   * Saat pertama kali menyala, ESP32 akan memancarkan WiFi *Access Point* bernama **`Lindu_Node_XXXX`**.
+   * Hubungkan HP/Laptop Anda ke WiFi tersebut.
+   * Akan muncul halaman *Captive Portal* secara otomatis.
+   * Masukkan **Nama WiFi Rumah Anda**, **Password WiFi**, dan **IP Address Server MQTT** (IP komputer/laptop yang menjalankan Docker).
+   * Masukkan Koordinat awal (Latitude & Longitude).
+   * Klik **Save**. ESP32 akan *restart* dan terhubung ke *server* Anda.
+
+---
+
+## 4. Menjalankan Mesin Konsensus
+Mesin konsensus adalah otak sistem yang mencegah *False Positive* menggunakan perhitungan Fisika Gelombang P-Wave.
+
+1. Masuk ke folder server:
+   ```bash
+   cd src/server
+   ```
+2. Install *library* Python:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. Jalankan *engine*:
+   ```bash
+   python consensus.py
+   ```
+*(Catatan: Anda juga bisa membungkusnya ke dalam Docker agar berjalan otomatis bersama Grafana).*
+
+---
+
+## 5. Panduan Operasional & Command Center
+
+Sistem Lindu-EEW dilengkapi dengan kendali jarak jauh (OTA & MQTT) yang bisa diakses dari **Grafana Interactive Command Center**.
+
+* **📡 FORCE OTA UPDATE:** 
+  Menyuruh semua node mengunduh versi firmware terbaru secara otomatis dari halaman *GitHub Releases* di Organisasi `Lindu-EEW`.
+* **📍 SET KOORDINAT BARU:**
+  Memungkinkan Anda mengubah titik GPS Node (Latitude & Longitude) secara instan tanpa perlu mencabut alat atau mereset WiFi. Sangat berguna untuk simulasi perambatan gelombang gempa di peta.
+* **🔥 FACTORY RESET:**
+  Menghapus paksa memori kredensial WiFi dan koordinat di ESP32, lalu mengembalikannya menjadi mode *Access Point* (Lindu_Node_XXXX).
