@@ -1,0 +1,9 @@
+[submodule "src/esp32_sensor_node"]
+	path = src/esp32_sensor_node
+	url = https://github.com/Lindu-EEW/lindu_node.git
+[submodule "src/server"]
+	path = src/server
+	url = https://github.com/Lindu-EEW/lindu_backend.git
+[submodule "prototype/grafana-stack"]
+	path = prototype/grafana-stack
+	url = https://github.com/Lindu-EEW/lindu_grafana.git
