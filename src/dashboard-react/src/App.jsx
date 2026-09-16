@@ -1,28 +1,52 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useMqtt } from './hooks/useMqtt';
 import MapPanel from './components/MapPanel';
 import TopOverlay from './components/TopOverlay';
 import HistorySidebar from './components/HistorySidebar';
 import AlarmBanner from './components/AlarmBanner';
+import LocalShakeToast from './components/LocalShakeToast';
 import NodeDetailModal from './components/NodeDetailModal';
 import CommandCenterPanel from './components/CommandCenterPanel';
 
 function App() {
-  const { isConnected, activeNodes, quakeDatabase, liveAlarm, setLiveAlarm, localMode, setLocalMode, sendCommand } = useMqtt();
+  const { isConnected, activeNodes, quakeDatabase, liveAlarm, setLiveAlarm, localMode, setLocalMode, localShakeEvents, sendCommand } = useMqtt();
   const [selectedQuake, setSelectedQuake] = useState(null);
   const [focusedNode, setFocusedNode] = useState(null);
   const [detailNode, setDetailNode] = useState(null);
+  const [flyToUserTrigger, setFlyToUserTrigger] = useState(0);
   
   const [userLat, setUserLat] = useState(35.6895);
   const [userLon, setUserLon] = useState(139.6917);
   const [locationName, setLocationName] = useState("Tokyo, Japan");
 
+  // Koordinat node sensor (ESP) yang tersimpan, dipakai sebagai sumber lokasi utama
+  const nodeCoord = useMemo(() => {
+    const node = Object.values(activeNodes).find(
+      (n) => typeof n.lat === 'number' && typeof n.lon === 'number' && Number.isFinite(n.lat) && Number.isFinite(n.lon)
+    );
+    return node ? { lat: node.lat, lon: node.lon } : null;
+  }, [activeNodes]);
+
+  const hasNodeCoord = useRef(false);
+
+  // Prioritas 1: pakai lat/lon dari node ESP yang sudah terdaftar
+  useEffect(() => {
+    if (nodeCoord) {
+      hasNodeCoord.current = true;
+      setUserLat(nodeCoord.lat);
+      setUserLon(nodeCoord.lon);
+    }
+  }, [nodeCoord]);
+
+  // Prioritas 2: fallback ke lokasi browser HANYA jika belum ada node ESP yang melapor
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
-          setUserLat(pos.coords.latitude);
-          setUserLon(pos.coords.longitude);
+          if (!hasNodeCoord.current) {
+            setUserLat(pos.coords.latitude);
+            setUserLon(pos.coords.longitude);
+          }
         },
         () => {},
         { enableHighAccuracy: true, timeout: 5000 }
@@ -50,16 +74,18 @@ function App() {
         focusedNode={focusedNode}
         displayQuake={liveAlarm || selectedQuake || (quakeDatabase.length > 0 ? quakeDatabase[0] : null)} 
         quakeDatabase={quakeDatabase} 
-        userLat={userLat} 
-        userLon={userLon} 
+        userLat={userLat}
+        userLon={userLon}
+        flyToUserTrigger={flyToUserTrigger}
       />
-      
+
       {/* Left Sidebar Layout */}
       <div className="absolute left-6 top-6 bottom-6 w-80 flex flex-col gap-4 z-[1000] pointer-events-none">
-        <TopOverlay 
-          isConnected={isConnected} 
-          activeNodesCount={Object.keys(activeNodes).length} 
+        <TopOverlay
+          isConnected={isConnected}
+          activeNodesCount={Object.keys(activeNodes).length}
           locationName={locationName}
+          onFlyToLocation={() => setFlyToUserTrigger((n) => n + 1)}
         />
         <HistorySidebar 
           history={quakeDatabase} 
@@ -79,8 +105,10 @@ function App() {
         />
       </div>
       
-      <AlarmBanner 
-        liveAlarm={liveAlarm} 
+      <LocalShakeToast events={localShakeEvents} />
+
+      <AlarmBanner
+        liveAlarm={liveAlarm}
         userLat={userLat} 
         userLon={userLon} 
         onDismiss={() => setLiveAlarm(null)}
