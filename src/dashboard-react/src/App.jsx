@@ -109,9 +109,16 @@ function App() {
 
       <AlarmBanner
         liveAlarm={liveAlarm}
-        userLat={userLat} 
-        userLon={userLon} 
-        onDismiss={() => setLiveAlarm(null)}
+        userLat={userLat}
+        userLon={userLon}
+        onDismiss={() => {
+          // "Abaikan Peringatan" harus mengembalikan aktuator ke kondisi normal juga,
+          // bukan cuma menutup banner - trigger_siren memaksa valve terkunci tertutup
+          // dan pintu terbuka (evakuasi), dan itu tidak pernah reset sendiri.
+          sendCommand('enable_valve');
+          sendCommand('lock_door');
+          setLiveAlarm(null);
+        }}
       />
 
       {detailNode && (

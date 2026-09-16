@@ -106,7 +106,11 @@ export function useMqtt() {
         }
 
         if (parts[1] === 'actuator' && parts[2] === 'cmd' && parts[3] === 'all') {
-          setLiveAlarm((prev) => prev ? { ...prev, ...payload } : null);
+          // Hanya payload alarm gempa (trigger_siren) yang memicu/mengisi liveAlarm.
+          // Perintah aktuator lain (lock/unlock/identify/dll) tidak boleh menyentuhnya.
+          if (payload.cmd === 'trigger_siren') {
+            setLiveAlarm((prev) => ({ ...(prev || {}), ...payload }));
+          }
         }
 
       } catch (e) {
