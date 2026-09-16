@@ -1,5 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import mqtt from 'mqtt';
+
+// Sama dengan ambang batas is_earthquake_spike di firmware (SensorManager.cpp)
+const LOCAL_SHAKE_PGA_THRESHOLD = 0.12;
+// Sama dengan durasi local_alarm_until di firmware (main.cpp), dipakai sebagai cooldown notifikasi per node
+const LOCAL_SHAKE_COOLDOWN_MS = 5000;
 
 export function useMqtt() {
   const [client, setClient] = useState(null);
@@ -8,6 +13,8 @@ export function useMqtt() {
   const [quakeDatabase, setQuakeDatabase] = useState([]);
   const [liveAlarm, setLiveAlarm] = useState(null);
   const [localMode, setLocalMode] = useState(false);
+  const [localShakeEvents, setLocalShakeEvents] = useState([]);
+  const lastShakeFiredAt = useRef({});
 
   useEffect(() => {
     const host = window.location.hostname || 'localhost';
@@ -82,6 +89,20 @@ export function useMqtt() {
               sensor_ok: prev[nodeId]?.sensor_ok ?? true
             }
           }));
+
+          // Getaran lokal terdeteksi (sama seperti trigger local_alarm di firmware).
+          // Notifikasi ini murni deduksi dari nilai PGA, bukan alarm gempa resmi/terkonfirmasi.
+          if (payload.pga > LOCAL_SHAKE_PGA_THRESHOLD) {
+            const now = Date.now();
+            const lastFired = lastShakeFiredAt.current[nodeId] || 0;
+            if (now - lastFired > LOCAL_SHAKE_COOLDOWN_MS) {
+              lastShakeFiredAt.current[nodeId] = now;
+              setLocalShakeEvents(prev => [
+                ...prev.slice(-4),
+                { id: `${nodeId}-${now}`, nodeId, pga: payload.pga, ts: now }
+              ]);
+            }
+          }
         }
 
         if (parts[1] === 'actuator' && parts[2] === 'cmd' && parts[3] === 'all') {
@@ -118,6 +139,7 @@ export function useMqtt() {
     setLiveAlarm,
     localMode,
     setLocalMode,
+    localShakeEvents,
     sendCommand
   };
 }

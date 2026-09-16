@@ -1,13 +1,17 @@
 import React from 'react';
 
-export default function TopOverlay({ isConnected, activeNodesCount, locationName }) {
+export default function TopOverlay({ isConnected, activeNodesCount, locationName, onFlyToLocation }) {
   return (
     <div className="bg-black/80 p-5 rounded-xl border border-gray-700 pointer-events-auto shadow-xl flex-shrink-0">
         <h1 className="text-3xl font-black text-orange-500 tracking-wider flex items-center gap-2">
           <span className="text-red-500 text-4xl">∿</span> LINDU.ID <span className="text-gray-400 text-sm font-normal">COMMAND CENTER</span>
         </h1>
         <div className="mt-3 space-y-1">
-          <p className="text-gray-400 text-sm">
+          <p
+            className={`text-gray-400 text-sm ${onFlyToLocation ? 'cursor-pointer hover:text-gray-200' : ''}`}
+            onClick={onFlyToLocation}
+            title={onFlyToLocation ? 'Terbang ke lokasi Anda' : undefined}
+          >
             Lokasi: <span className="text-white font-bold">{locationName || "Mendeteksi..."}</span>
           </p>
           <p className="text-gray-400 text-sm">
