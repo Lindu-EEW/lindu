@@ -80,6 +80,10 @@ export function useMqtt() {
               lat: payload.lat,
               lon: payload.lon,
               pga: payload.pga,
+              gas_alert: payload.gas_alert ?? false,
+              gas_raw: payload.gas_raw ?? null,
+              valve_status: payload.valve_status ?? prev[nodeId]?.valve_status ?? 'UNKNOWN',
+              door_status: payload.door_status ?? prev[nodeId]?.door_status ?? 'UNAVAILABLE',
               last_seen: Date.now(),
               // Pertahankan data status jika ada
               status: prev[nodeId]?.status || 'online',
@@ -106,7 +110,11 @@ export function useMqtt() {
         }
 
         if (parts[1] === 'actuator' && parts[2] === 'cmd' && parts[3] === 'all') {
-          setLiveAlarm((prev) => prev ? { ...prev, ...payload } : null);
+          // Hanya payload alarm gempa (trigger_siren) yang memicu/mengisi liveAlarm.
+          // Perintah aktuator lain (lock/unlock/identify/dll) tidak boleh menyentuhnya.
+          if (payload.cmd === 'trigger_siren') {
+            setLiveAlarm((prev) => ({ ...(prev || {}), ...payload }));
+          }
         }
 
       } catch (e) {

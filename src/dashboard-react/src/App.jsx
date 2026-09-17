@@ -4,6 +4,7 @@ import MapPanel from './components/MapPanel';
 import TopOverlay from './components/TopOverlay';
 import HistorySidebar from './components/HistorySidebar';
 import AlarmBanner from './components/AlarmBanner';
+import GasAlertBanner from './components/GasAlertBanner';
 import LocalShakeToast from './components/LocalShakeToast';
 import NodeDetailModal from './components/NodeDetailModal';
 import CommandCenterPanel from './components/CommandCenterPanel';
@@ -107,11 +108,23 @@ function App() {
       
       <LocalShakeToast events={localShakeEvents} />
 
+      <GasAlertBanner activeNodes={activeNodes} sendCommand={sendCommand} />
+
       <AlarmBanner
         liveAlarm={liveAlarm}
-        userLat={userLat} 
-        userLon={userLon} 
-        onDismiss={() => setLiveAlarm(null)}
+        userLat={userLat}
+        userLon={userLon}
+        onDismiss={() => {
+          // "Abaikan Peringatan" harus mengembalikan aktuator ke kondisi normal juga,
+          // bukan cuma menutup banner - trigger_siren memaksa valve terkunci tertutup
+          // dan pintu terbuka (evakuasi), dan itu tidak pernah reset sendiri.
+          // HARUS pakai cancel_alarm (bukan enable_valve+lock_door terpisah): selama
+          // window global_alarm_until masih aktif, firmware memaksa is_door_locked=false
+          // di setiap loop tick, jadi lock_door langsung ditimpa balik dalam ~20ms.
+          // cancel_alarm menol-kan global_alarm_until secara atomik agar reset permanen.
+          sendCommand('cancel_alarm');
+          setLiveAlarm(null);
+        }}
       />
 
       {detailNode && (

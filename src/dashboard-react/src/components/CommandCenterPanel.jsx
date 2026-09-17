@@ -1,5 +1,5 @@
 import React from 'react';
-import { Shield, Unlock, Lightbulb, DownloadCloud, TerminalSquare } from 'lucide-react';
+import { Shield, Unlock, Lightbulb, DownloadCloud, TerminalSquare, Flame } from 'lucide-react';
 
 export default function CommandCenterPanel({ activeNodes, sendCommand }) {
     const nodes = Object.values(activeNodes);
@@ -27,8 +27,15 @@ export default function CommandCenterPanel({ activeNodes, sendCommand }) {
                                 <div className="text-gray-400">OTA: <span className={`font-mono ${n.ota_status && n.ota_status.includes('ERROR') ? 'text-red-500' : (n.ota_status === 'IDLE' ? 'text-gray-400' : 'text-yellow-400 animate-pulse')}`}>{n.ota_status || 'IDLE'}</span></div>
                                 <div className="text-gray-400">Latensi: <span className="text-white">{n.latency_ms || 0} ms</span></div>
                                 <div className="text-gray-400">Sensor: <span className={n.sensor_ok !== false ? 'text-green-400' : 'text-red-500'}>{n.sensor_ok !== false ? 'OK' : 'FAIL'}</span></div>
+                                <div className="text-gray-400">Valve: <span className={n.valve_status === 'DISABLED' ? 'text-red-500' : 'text-green-400'}>{n.valve_status || 'UNKNOWN'}</span></div>
+                                <div className="text-gray-400">Pintu: <span className={n.door_status === 'LOCKED' ? 'text-yellow-400' : 'text-green-400'}>{n.door_status || 'UNAVAILABLE'}</span></div>
                             </div>
-                            
+                            {n.gas_alert && (
+                                <div className="flex items-center gap-1 text-[10px] font-bold text-orange-300 bg-orange-900/50 border border-orange-600 rounded px-2 py-1 mb-2">
+                                    <Flame size={12} /> KEBOCORAN GAS TERDETEKSI{typeof n.gas_raw === 'number' ? ` (${n.gas_raw})` : ''}
+                                </div>
+                            )}
+
                             <div className="flex gap-2 mb-2">
                                 <button onClick={() => sendCommand('disable_valve', n.id)} className="flex-1 flex justify-center items-center gap-1 bg-red-900/50 hover:bg-red-700 text-red-200 text-[10px] py-1.5 rounded border border-red-700 transition">
                                     <Shield size={12} /> Lock
