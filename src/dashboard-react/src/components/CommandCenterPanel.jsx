@@ -1,15 +1,36 @@
-import React from 'react';
-import { Shield, Unlock, Lightbulb, DownloadCloud, TerminalSquare, Flame } from 'lucide-react';
+import React, { useState } from 'react';
+import { Shield, Unlock, Lightbulb, DownloadCloud, TerminalSquare, Flame, DoorOpen, DoorClosed, PanelRightClose, PanelRightOpen } from 'lucide-react';
 
 export default function CommandCenterPanel({ activeNodes, sendCommand }) {
     const nodes = Object.values(activeNodes);
+    const [collapsed, setCollapsed] = useState(false);
+
+    if (collapsed) {
+        return (
+            <button
+                onClick={() => setCollapsed(false)}
+                className="bg-gray-900/90 text-blue-400 border border-blue-500/50 rounded-l-xl shadow-2xl backdrop-blur-sm pointer-events-auto px-2 py-4 flex flex-col items-center gap-2 hover:bg-gray-800 transition"
+                title="Buka Command Center"
+            >
+                <PanelRightOpen size={18} />
+                <span className="text-[10px] font-bold [writing-mode:vertical-rl] tracking-wider">COMMAND CENTER</span>
+            </button>
+        );
+    }
 
     return (
         <div className="bg-gray-900/90 p-5 rounded-xl border border-blue-500/50 pointer-events-auto shadow-2xl backdrop-blur-sm w-96 max-h-[85vh] overflow-y-auto flex flex-col pointer-events-auto">
-            <h2 className="text-xl font-bold text-blue-400 mb-4 border-b border-blue-500/30 pb-2 flex items-center gap-2">
-                <TerminalSquare size={20} /> Command Center
+            <h2 className="text-xl font-bold text-blue-400 mb-4 border-b border-blue-500/30 pb-2 flex items-center justify-between gap-2">
+                <span className="flex items-center gap-2"><TerminalSquare size={20} /> Command Center</span>
+                <button
+                    onClick={() => setCollapsed(true)}
+                    className="text-gray-400 hover:text-white transition"
+                    title="Minimize Command Center"
+                >
+                    <PanelRightClose size={18} />
+                </button>
             </h2>
-            
+
             <div className="space-y-4 flex-1">
                 {nodes.length === 0 ? (
                     <div className="text-center text-gray-500 text-sm py-10">Belum ada data sensor.</div>
@@ -36,14 +57,36 @@ export default function CommandCenterPanel({ activeNodes, sendCommand }) {
                                 </div>
                             )}
 
-                            <div className="flex gap-2 mb-2">
+                            <p className="text-[10px] uppercase tracking-wider text-gray-500 font-bold mb-1">Valve Gas/Air</p>
+                            <div className="flex gap-2 mb-3">
                                 <button onClick={() => sendCommand('disable_valve', n.id)} className="flex-1 flex justify-center items-center gap-1 bg-red-900/50 hover:bg-red-700 text-red-200 text-[10px] py-1.5 rounded border border-red-700 transition">
                                     <Shield size={12} /> Lock
                                 </button>
-                                <button onClick={() => sendCommand('enable_valve', n.id)} className="flex-1 flex justify-center items-center gap-1 bg-green-900/50 hover:bg-green-700 text-green-200 text-[10px] py-1.5 rounded border border-green-700 transition">
+                                <button
+                                    onClick={() => {
+                                        if (!n.gas_alert || confirm(`Node ${n.id} masih melaporkan kebocoran gas. Pastikan area sudah AMAN sebelum membuka valve kembali. Lanjutkan?`)) {
+                                            sendCommand('enable_valve', n.id);
+                                        }
+                                    }}
+                                    className="flex-1 flex justify-center items-center gap-1 bg-green-900/50 hover:bg-green-700 text-green-200 text-[10px] py-1.5 rounded border border-green-700 transition"
+                                >
                                     <Unlock size={12} /> Unlock
                                 </button>
                             </div>
+
+                            <p className="text-[10px] uppercase tracking-wider text-gray-500 font-bold mb-1">Pintu (Solenoid Door Lock)</p>
+                            <div className="flex gap-2 mb-3">
+                                <button onClick={() => sendCommand('lock_door', n.id)} className="flex-1 flex justify-center items-center gap-1 bg-yellow-900/50 hover:bg-yellow-700 text-yellow-200 text-[10px] py-1.5 rounded border border-yellow-700 transition">
+                                    <DoorClosed size={12} /> Lock
+                                </button>
+                                <button onClick={() => sendCommand('unlock_door', n.id)} className="flex-1 flex justify-center items-center gap-1 bg-green-900/50 hover:bg-green-700 text-green-200 text-[10px] py-1.5 rounded border border-green-700 transition">
+                                    <DoorOpen size={12} /> Unlock
+                                </button>
+                            </div>
+                            <p className="text-[9px] text-gray-500 mb-3 -mt-1">
+                                Catatan: selama alarm gempa aktif, status pintu diambil alih otomatis oleh sensor PIR (unlock hanya jika ada gerakan 10 menit terakhir) - command manual di atas bisa ditimpa balik saat itu.
+                            </p>
+
                             <div className="flex gap-2">
                                 <button onClick={() => sendCommand('identify', n.id)} className="flex-1 flex justify-center items-center gap-1 bg-gray-800 hover:bg-gray-600 text-white text-[10px] py-1.5 rounded border border-gray-600 transition">
                                     <Lightbulb size={12} /> Identify
@@ -56,7 +99,7 @@ export default function CommandCenterPanel({ activeNodes, sendCommand }) {
                     ))
                 )}
             </div>
-            
+
             <div className="mt-4 pt-4 border-t border-gray-700">
                 <button onClick={() => sendCommand('force_update', 'all')} className="w-full flex justify-center items-center gap-2 bg-purple-900/50 hover:bg-purple-700 text-purple-200 text-xs py-2.5 rounded border border-purple-700 transition font-bold">
                     <DownloadCloud size={14} /> UPDATE SEMUA NODE (GLOBAL)
