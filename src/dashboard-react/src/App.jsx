@@ -4,6 +4,7 @@ import MapPanel from './components/MapPanel';
 import TopOverlay from './components/TopOverlay';
 import HistorySidebar from './components/HistorySidebar';
 import AlarmBanner from './components/AlarmBanner';
+import GasAlertBanner from './components/GasAlertBanner';
 import LocalShakeToast from './components/LocalShakeToast';
 import NodeDetailModal from './components/NodeDetailModal';
 import CommandCenterPanel from './components/CommandCenterPanel';
@@ -106,6 +107,8 @@ function App() {
       </div>
       
       <LocalShakeToast events={localShakeEvents} />
+
+      <GasAlertBanner activeNodes={activeNodes} sendCommand={sendCommand} />
 
       <AlarmBanner
         liveAlarm={liveAlarm}

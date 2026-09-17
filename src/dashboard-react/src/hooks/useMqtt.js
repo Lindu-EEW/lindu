@@ -80,6 +80,10 @@ export function useMqtt() {
               lat: payload.lat,
               lon: payload.lon,
               pga: payload.pga,
+              gas_alert: payload.gas_alert ?? false,
+              gas_raw: payload.gas_raw ?? null,
+              valve_status: payload.valve_status ?? prev[nodeId]?.valve_status ?? 'UNKNOWN',
+              door_status: payload.door_status ?? prev[nodeId]?.door_status ?? 'UNAVAILABLE',
               last_seen: Date.now(),
               // Pertahankan data status jika ada
               status: prev[nodeId]?.status || 'online',
