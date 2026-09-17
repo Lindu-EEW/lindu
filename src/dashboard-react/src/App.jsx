@@ -115,8 +115,11 @@ function App() {
           // "Abaikan Peringatan" harus mengembalikan aktuator ke kondisi normal juga,
           // bukan cuma menutup banner - trigger_siren memaksa valve terkunci tertutup
           // dan pintu terbuka (evakuasi), dan itu tidak pernah reset sendiri.
-          sendCommand('enable_valve');
-          sendCommand('lock_door');
+          // HARUS pakai cancel_alarm (bukan enable_valve+lock_door terpisah): selama
+          // window global_alarm_until masih aktif, firmware memaksa is_door_locked=false
+          // di setiap loop tick, jadi lock_door langsung ditimpa balik dalam ~20ms.
+          // cancel_alarm menol-kan global_alarm_until secara atomik agar reset permanen.
+          sendCommand('cancel_alarm');
           setLiveAlarm(null);
         }}
       />
