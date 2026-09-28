@@ -25,43 +25,44 @@ Sistem ini terdiri dari 3 komponen utama (submodules):
 
 ## 1. Kebutuhan Perangkat Keras
 
+Sistem mendukung auto-deteksi akselerometer getaran (**LSM6DS3** atau **MPU-6050**) pada primary I2C bus (`Wire`).
+
 ### Varian A: ESP32-S3 (Servo Valve)
 | Komponen | Koneksi |
 |----------|---------|
-| LSM6DS3 (Seismik) | SDA → GPIO 10, SCL → GPIO 11 |
-| BME280/BMP280 (Atmosfer) | SDA → GPIO 10, SCL → GPIO 11 (Shared I2C) |
-| NeoPixel LED | GPIO 16 |
-| Buzzer (Active-Low) | GPIO 15 |
-| Servo Motor (Valve) | GPIO 2 |
+| LSM6DS3 / MPU-6050 (Seismik) | SDA → **GPIO 12**, SCL → **GPIO 13** |
+| BME280/BMP280 (Atmosfer) | SDA → **GPIO 10**, SCL → **GPIO 11** |
+| NeoPixel LED | GPIO 48 |
+| Buzzer (Active-Low) | GPIO 6 |
+| Servo Motor (Valve) | GPIO 5 |
+| MQ-2 Gas Sensor | GPIO 7 (Analog) |
 
 ### Varian B: ESP32 Classic/WROOM (Relay + Gas Sensor)
 | Komponen | Koneksi |
 |----------|---------|
-| LSM6DS3 (Seismik) | SDA → GPIO 18, SCL → GPIO 19 |
-| BME280/BMP280 (Atmosfer) | SDA → GPIO 21, SCL → GPIO 22 |
+| LSM6DS3 / MPU-6050 (Seismik) | SDA → **GPIO 21**, SCL → **GPIO 22** |
+| BME280/BMP280 (Atmosfer) | SDA → **GPIO 32**, SCL → **GPIO 33** |
+| PIR Motion Sensor | GPIO 19 |
 | Relay CH1 (Door Lock) | GPIO 25 |
 | Relay CH2 (Gas/Water Valve) | GPIO 26 |
 | MQ-2 Gas Sensor | GPIO 34 (Analog) |
-| NeoPixel LED | GPIO 16 |
-| Buzzer (Active-Low) | GPIO 15 |
+| RGB LED (Analog) | R → GPIO 4, G → GPIO 16, B → GPIO 17 |
+| Buzzer (Active-High) | GPIO 14 |
 
 ---
 
 ## 2. Instalasi Server (Docker & Grafana)
-Sistem *backend* sangat mudah di-deploy menggunakan Docker.
+Seluruh sistem *backend* dan visualisasi (MQTT, TimescaleDB, Consensus Engine, React Dashboard, & Grafana) dapat dijalankan langsung dengan satu perintah:
 
-1. **Masuk ke folder Grafana Stack:**
-   ```bash
-   cd prototype/grafana-stack
-   ```
-2. **Jalankan Docker Compose:**
-   ```bash
-   docker-compose up -d
-   ```
-3. **Akses Dashboard Grafana:**
-   * Buka browser ke `http://localhost:3000`
-   * Dashboard **"Seismic Monitor"** sudah terkonfigurasi secara otomatis.
-   * MQTT Broker otomatis berjalan di port `1883`.
+```bash
+docker compose up -d
+```
+
+### Akses Layanan:
+* **Web Dashboard**: [http://localhost:80](http://localhost:80)
+* **Grafana Monitoring**: [http://localhost:3000](http://localhost:3000) (Dashboard "Hardware Validation - ESP32 LSM6DS3" terpasang otomatis)
+* **Consensus Engine API**: [http://localhost:5050](http://localhost:5050)
+* **MQTT Broker**: `localhost:1883` (TCP) dan `localhost:9001` (WebSocket)
 
 ---
 

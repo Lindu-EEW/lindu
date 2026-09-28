@@ -16,9 +16,9 @@ export default function AlarmBanner({ liveAlarm, userLat, userLon, onDismiss }) 
   };
 
   // Safe destructuring for hooks
-  const lat = liveAlarm ? liveAlarm.epi_lat : 0;
-  const lon = liveAlarm ? liveAlarm.epi_lon : 0;
-  const rad = liveAlarm ? liveAlarm.radius_km : 0;
+  const lat = liveAlarm ? (liveAlarm.epi_lat ?? liveAlarm.epicenter_lat ?? 0) : 0;
+  const lon = liveAlarm ? (liveAlarm.epi_lon ?? liveAlarm.epicenter_lon ?? 0) : 0;
+  const rad = liveAlarm ? (liveAlarm.radius_km ?? liveAlarm.radius ?? 0) : 0;
   const ts = liveAlarm ? liveAlarm.timestamp : 0;
 
   const dist_km = liveAlarm ? getDistance(userLat, userLon, lat, lon) : 0;
@@ -63,13 +63,13 @@ export default function AlarmBanner({ liveAlarm, userLat, userLon, onDismiss }) 
           <div>
             <p className="text-sm text-red-300 uppercase font-bold tracking-wider mb-1">GELOMBANG MERUSAK TIBA DALAM:</p>
             <p className={`text-4xl font-mono font-bold ${eta <= 0 ? 'text-red-500' : 'text-white'}`}>
-              {eta <= 0 ? '🚨 TIBA! 🚨' : `${eta.toFixed(1)}s`}
+              {eta <= 0 ? '🚨 TIBA! 🚨' : `${(Number(eta) || 0).toFixed(1)}s`}
             </p>
           </div>
           <div className="text-right">
             <p className="text-sm text-red-300">Estimasi Kekuatan:</p>
             <p className="text-3xl font-black text-orange-400">M {liveAlarm.magnitude}</p>
-            <p className="text-xs text-red-200 mt-1">Jarak Anda: {dist_km.toFixed(1)} km</p>
+            <p className="text-xs text-red-200 mt-1">Jarak Anda: {(Number(dist_km) || 0).toFixed(1)} km</p>
           </div>
         </div>
         <button onClick={onDismiss} className="px-6 py-2 bg-red-900 hover:bg-red-800 rounded-lg border border-red-400 font-bold text-sm transition shadow-lg">Abaikan Peringatan / Reset</button>

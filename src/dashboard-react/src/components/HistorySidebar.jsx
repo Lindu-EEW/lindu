@@ -45,7 +45,7 @@ export default function HistorySidebar({ history, activeNodes, onSelectQuake, on
                     </button>
                   </div>
                   <div className="text-xs text-gray-500">
-                    Posisi: {data.lat.toFixed(4)}, {data.lon.toFixed(4)}
+                    Posisi: {data?.lat != null && data?.lon != null ? `${Number(data.lat).toFixed(4)}, ${Number(data.lon).toFixed(4)}` : 'Koordinat tidak tersedia'}
                   </div>
                 </div>
               ))

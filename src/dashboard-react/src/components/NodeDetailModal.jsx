@@ -53,7 +53,7 @@ export default function NodeDetailModal({ nodeId, nodeData, quakeDatabase, onClo
               </span>
               <span className="flex items-center gap-1"><Signal className="w-4 h-4" /> -74 dBm</span>
               <span className="flex items-center gap-1"><Clock className="w-4 h-4" /> up {uptime}</span>
-              <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> {nodeData?.lat.toFixed(4)}, {nodeData?.lon.toFixed(4)}</span>
+              <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> {nodeData?.lat != null && nodeData?.lon != null ? `${Number(nodeData.lat).toFixed(4)}, ${Number(nodeData.lon).toFixed(4)}` : 'Koordinat tidak tersedia'}</span>
             </div>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-gray-700 rounded-full transition-colors text-gray-400 hover:text-white">

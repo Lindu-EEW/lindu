@@ -32,14 +32,14 @@ export default function MapPanel({ activeNodes, focusedNode, displayQuake, quake
           mapRef.current.flyToBounds([
             [userLat, userLon],
             [qLat, qLon]
-          ], { padding: [50, 50], duration: 1.5 });
+          ], { padding: [50, 50], duration: 1.5, maxZoom: 12 });
       }
     }
   }, [displayQuake, userLat, userLon]);
 
   useEffect(() => {
     if (flyToUserTrigger && mapRef.current && isValidCoord(userLat, userLon)) {
-      mapRef.current.flyTo([userLat, userLon], 14, { duration: 1.5 });
+      mapRef.current.flyTo([userLat, userLon], 12, { duration: 1.5 });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [flyToUserTrigger]);
@@ -48,7 +48,7 @@ export default function MapPanel({ activeNodes, focusedNode, displayQuake, quake
     if (focusedNode && activeNodes[focusedNode] && mapRef.current) {
       const { lat, lon } = activeNodes[focusedNode];
       if (isValidCoord(lat, lon)) {
-        mapRef.current.flyTo([lat, lon], 12, { duration: 1.5 });
+        mapRef.current.flyTo([lat, lon], 11, { duration: 1.5 });
       }
     }
   }, [focusedNode, activeNodes]);
@@ -77,6 +77,8 @@ export default function MapPanel({ activeNodes, focusedNode, displayQuake, quake
     <MapContainer 
       center={[userLat, userLon]} 
       zoom={10} 
+      minZoom={4}
+      maxZoom={13}
       className="absolute inset-0 z-0 bg-gray-900"
       ref={mapRef}
       zoomControl={false}
@@ -84,6 +86,8 @@ export default function MapPanel({ activeNodes, focusedNode, displayQuake, quake
       <TileLayer
         url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}"
         attribution='&copy; <a href="https://www.esri.com/">Esri</a>'
+        maxZoom={13}
+        maxNativeZoom={13}
       />
       
       {/* User Marker */}

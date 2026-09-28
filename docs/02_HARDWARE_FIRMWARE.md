@@ -9,7 +9,7 @@
 | No | Component | Specification | Qty | Estimated Price |
 |----|-----------|---------------|-----|-----------------|
 | 1 | ESP32 Dev Board | ESP32-WROOM-32 or XIAO ESP32 | 1 | Rp 120.000 |
-| 2 | IMU Sensor | LSM6DS3 / LSM6DSO breakout board (Calculates gravity vector/pose for flat/wall mounting) | 1 | Rp 80.000 |
+| 2 | IMU Sensor | LSM6DS3 / LSM6DSO / MPU-6050 breakout board (Auto-detected on primary I2C bus) | 1 | Rp 40.000 - Rp 80.000 |
 | 3 | Buzzer | 5V Active buzzer | 1 | Rp 5.000 |
 | 4 | LED | 5mm Red LED + 220Ω resistor | 2 | Rp 2.000 |
 | 5 | OLED Display | 0.96" SSD1306 I2C (optional) | 1 | Rp 30.000 |
@@ -49,33 +49,25 @@
 
 ## Wiring Diagram
 
-### Sensor Node — ESP32 + LSM6DS3
+### Sensor Node — ESP32 + LSM6DS3 / MPU-6050
+
+Modul firmware Lindu mendukung auto-deteksi untuk **LSM6DS3** (alamat `0x6A`/`0x6B`) dan **MPU-6050** (alamat `0x68`/`0x69`) pada primary I2C bus (`Wire`).
+
+| Pin Sensor | ESP32-S3 (DevKitC-1) | ESP32 Classic / WROOM-32 |
+|---|---|---|
+| **VCC** | 3.3V | 3.3V |
+| **GND** | GND | GND |
+| **SDA** | **GPIO 12** | **GPIO 21** |
+| **SCL** | **GPIO 13** | **GPIO 22** |
+| **AD0** (MPU-6050) | GND (alamat `0x68`, opsional) | GND (alamat `0x68`, opsional) |
 
 ```
-ESP32                   LSM6DS3
-────────               ─────────
-3.3V      ──────────►  VCC
-GND       ──────────►  GND
-GPIO 8 (SDA) ───────►  SDA  (I2C)
-GPIO 9 (SCL) ───────►  SCL  (I2C)
-GPIO 4    ──────────►  INT1 (Vibration interrupt)
-
-ESP32                   Buzzer
-────────               ────────
-GPIO 12   ──► 220Ω ──► + (Buzzer)
-GND       ──────────►  - (Buzzer)
-
-ESP32                   Red LED
-────────               ──────────
-GPIO 13   ──► 220Ω ──► Anode (+)
-GND       ──────────►  Cathode (-)
-
-ESP32                   OLED SSD1306 (optional)
-────────               ────────────────────────
-3.3V      ──────────►  VCC
-GND       ──────────►  GND
-GPIO 8 (SDA) ───────►  SDA  (Shared I2C)
-GPIO 9 (SCL) ───────►  SCL  (Shared I2C)
+ESP32 (S3 / WROOM)      LSM6DS3 / MPU-6050
+──────────────────      ──────────────────
+3.3V      ───────────►  VCC
+GND       ───────────►  GND
+SDA (12 / 21) ───────►  SDA  (I2C Seismik Wire)
+SCL (13 / 22) ───────►  SCL  (I2C Seismik Wire)
 ```
 
 ### Actuator Node — ESP32 + Actuator

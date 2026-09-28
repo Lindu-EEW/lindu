@@ -28,7 +28,7 @@ export default function LocalShakeToast({ events }) {
         >
           <span className="text-lg">⚡</span>
           <span>
-            <span className="font-bold">{e.nodeId}</span> mendeteksi guncangan (PGA: {e.pga.toFixed(2)}G)
+            <span className="font-bold">{e.nodeId}</span> mendeteksi guncangan (PGA: {e.pga != null ? Number(e.pga).toFixed(2) : '0.00'}G)
           </span>
         </div>
       ))}

@@ -1,0 +1,16 @@
+apiVersion: 1
+datasources:
+  - name: PostgreSQL
+    type: postgres
+    uid: lindu_pg
+    url: timescaledb:5432
+    database: lindudb
+    user: lindu_admin
+    secureJsonData:
+      password: supersecretpassword
+    jsonData:
+      sslmode: disable
+      postgresVersion: 15
+      timescaledb: true
+      database: lindudb
+    isDefault: true

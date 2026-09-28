@@ -38,6 +38,31 @@ export function useMqtt() {
       })
       .catch(err => console.error("Gagal mengambil riwayat gempa:", err));
 
+    // Fetch Master Nodes from REST API
+    fetch(`http://${host}:5050/api/nodes`)
+      .then(res => res.json())
+      .then(nodesList => {
+        if (Array.isArray(nodesList)) {
+          setActiveNodes(prev => {
+            const updated = { ...prev };
+            nodesList.forEach(n => {
+              if (n.node_id) {
+                updated[n.node_id] = {
+                  id: n.node_id,
+                  lat: n.lat,
+                  lon: n.lon,
+                  last_seen: n.last_seen ? new Date(n.last_seen).getTime() : Date.now(),
+                  status: 'online',
+                  ...updated[n.node_id]
+                };
+              }
+            });
+            return updated;
+          });
+        }
+      })
+      .catch(err => console.error("Gagal mengambil daftar node:", err));
+
     const mqttClient = mqtt.connect(`ws://${host}:9001`);
 
     mqttClient.on('connect', () => {
@@ -61,12 +86,16 @@ export function useMqtt() {
            setActiveNodes(prev => ({
               ...prev,
               [nodeId]: {
+                  id: nodeId,
                   ...prev[nodeId],
                   status: payload.status,
                   fw_version: payload.fw_version,
                   ota_status: payload.ota_status,
                   latency_ms: payload.latency_ms,
-                  sensor_ok: payload.sensor_ok
+                  sensor_ok: payload.sensor_ok,
+                  ...(payload.lat != null ? { lat: payload.lat } : {}),
+                  ...(payload.lon != null ? { lon: payload.lon } : {}),
+                  last_seen: Date.now()
               }
            }));
         }

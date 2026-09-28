@@ -60,6 +60,26 @@ services:
     volumes:
       - ./src/dashboard-react/dist:/usr/share/nginx/html:ro
 
+  # 5. Visualisasi Grafana (Terkoneksi langsung ke Time-Series Database timescaledb)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana_dashboard
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_PANELS_DISABLE_SANITIZE_HTML=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_DASHBOARDS_MIN_REFRESH_INTERVAL=1s
+      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/var/lib/grafana/dashboards/seismic.json
+    depends_on:
+      - timescaledb
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./prototype/grafana-stack/grafana/dashboards:/var/lib/grafana/dashboards:ro
+
 volumes:
   mosquitto_data:
   mosquitto_log:
