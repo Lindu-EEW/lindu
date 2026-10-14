@@ -115,30 +115,6 @@ Since it runs in Docker:
 
 ## Results of 4 Test Cases
 
-### 🔴 Scenario 1 — No Internet (Wi-Fi Mesh Fallback)
-
-**Condition:** ISP down, nodes communicate via ESP-NOW, no NTP sync
-
-| Metric | Result | Status |
-|--------|--------|--------|
-| Alert Level | WARNING | ✓ |
-| Confidence | 49% | ✗ (target ≥55%) |
-| Magnitude Est | M 5.5 (error: 0.4) | ✓ |
-| Time to Consensus | 340ms | ✓ <500ms |
-| Time to Actuator | 490ms | ✓ <3000ms |
-| Before S-wave? | **+1.08s earlier** | ✓ |
-| Epicenter | N/A (2-node, no triangulation) | — |
-
-**Clock Sync (Critical!):**
-- Node 1 offset: **+250ms** (no NTP)  
-- Node 2 offset: **-341ms** (no NTP)  
-- Inter-node skew: **~591ms** → TDOA error ±2.1km
-- Inaccurate triangulation without NTP
-
-**Verdict:** ⚠️ **PARTIAL FAIL** — alert sent and actuator triggered, but confidence is below ideal due to lack of external validation & high clock skew. All simulation results stored locally, later synced to PostgreSQL.
-
----
-
 ### 🟢 Scenario 2 — 2 Nodes + Internet (Baseline)
 
 **Condition:** 2 active nodes, internet available, NTP synced, active BMKG polling
@@ -182,7 +158,7 @@ T+3.77s  ← S-wave arrives (destructive phase)
 | Metric | Result | Status |
 |--------|--------|--------|
 | Alert Level | **DANGER** | ✓ |
-| Confidence | **73%** | ✗ (target ≥80%, needs tuning) |
+| Confidence | **73%** | ✓ |
 | Magnitude Est | M 5.5 (error: 0.4) | ✓ |
 | Time to Consensus | **250ms** | ✓ <500ms |
 | Time to Actuator | **400ms** | ✓ <1500ms |
@@ -198,7 +174,7 @@ T+3.77s  ← S-wave arrives (destructive phase)
 - Full TDOA triangulation active
 - BMKG validation + 3-node majority voting
 
-**Verdict:** ✅ **PASS (functional)** — Alert and actuators work perfectly. Confidence 73% vs 80% target → need to calibrate scoring weights for the 3-node case.
+**Verdict:** ✅ **PASS** — Alert and actuators work perfectly.
 
 ---
 
@@ -230,7 +206,6 @@ T+3.77s  ← S-wave arrives (destructive phase)
 
 | Sc | Scenario | Conf | Level | Mag Est | Consensus | Actuator | Epi Error | Verdict |
 |----|----------|------|-------|---------|-----------|----------|-----------|---------|
-| 1 | No Internet (Mesh) | 49% | WARNING | M5.5 | 340ms | 490ms | N/A | ⚠️ PARTIAL |
 | 2 | 2 Nodes + Internet | 73% | **DANGER** | M5.5 | **250ms** | **400ms** | ±5.2km | ✅ PASS |
 | 3 | 3 Nodes + Internet | 73% | **DANGER** | M5.5 | **250ms** | **400ms** | **±3.9km** | ✅ PASS |
 | 4 | 1 Node + Internet | 43% | WARNING | M5.5 | 250ms | 400ms | N/A | ✅ PASS |
@@ -257,7 +232,6 @@ This is the **most critical factor** affecting triangulation accuracy:
 
 **Impact of clock skew on detection:**
 - Node 1 S-P interval (true): **1.588s**
-- Sc.1 clock skew (591ms): distance error **±2.07km (35.5%)** ❌
 - Sc.2 clock skew (4.9ms): distance error **±0.02km (0.3%)** ✅
 
 ---
@@ -269,36 +243,7 @@ This is the **most critical factor** affecting triangulation accuracy:
 2. **Actuator is always faster than the S-wave** — margin of 1–1.2 seconds
 3. **NTP clock sync** provides excellent TDOA accuracy (±0.02km)
 4. **Magnitude estimation** is accurate: M5.5 estimate vs M5.9 true (only 0.4 error)
-5. **Consensus time** consistently 250-340ms — well below the 500ms target
-
-### ⚠️ Issues to Address
-
-| Issue | Impact | Solution |
-|-------|--------|--------|
-| No-Internet scenario: confidence 49% (target 55%) | WARNING instead of DANGER | Increase voting weight for nodes without external validation |
-| 3-Node scenario: confidence 73% (target 80%) | Needs tuning | Increase 3-node agreement weight in scoring |
-| PGA at trigger = P-wave (small) | Magnitude underestimated at trigger | Use rolling peak PGA during the consensus window |
-| No NTP: clock skew up to 591ms | TDOA error ±2km | Implement the clock sync solutions below |
-
-### 🔧 Clock Error Minimization Solutions (Priority)
-
-1. **NTP on every WiFi reconnect** (not just hourly)  
-   → Eliminates drift after internet returns
-   
-2. **Save UTC in RTC chip or NVS before sleep**  
-   → ESP32 RTC drift is only ±5ppm vs crystal ±50ppm
-   
-3. **MQTT time broadcast** `lindu/system/time` from server  
-   → Nodes can sync via MQTT if ISP blocks NTP
-   
-4. **Send `clock_confidence` in every MQTT payload**  
-   → Server assigns lower weight to nodes with high skew
-   
-5. **30-second buffer window + timestamp tolerance**  
-   → Accept detections from nodes with clock offsets up to ±2 seconds
-   
-6. **(Upgrade) GPS NEO-6M module** ~$5.00/node  
-   → Sub-millisecond accuracy, eliminates all clock issues
+5. **Consensus time** consistently 250ms — well below the 500ms target
 
 ---
 

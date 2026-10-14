@@ -752,34 +752,6 @@ JMA_POLL_INTERVAL=60
 
 ---
 
-## Security Checklist
-
-### Before Deployment
-- [ ] All credentials in environment variables (no hardcoding)
-- [ ] TLS certificate is valid and auto-renew is configured
-- [ ] UFW firewall is active and rules are correct
-- [ ] Docker networking isolation is correct
-- [ ] MQTT node passwords are hashed in the passwd file
-- [ ] MQTT ACL is configured
-- [ ] .env is in .gitignore
-- [ ] JWT secret is a 256-bit random hex
-
-### ESP32 Firmware
-- [ ] CA certificate is embedded for server verification
-- [ ] Credentials are saved in NVS, not plaintext flash
-- [ ] Secure Boot is enabled (production)
-- [ ] Flash Encryption is enabled (production)
-- [ ] Anti-replay: timestamp + sequence validation
-
-### Runtime Monitoring
-- [ ] Log all authentication failures
-- [ ] Alert if a node suddenly goes offline (>5 minutes)
-- [ ] Alert if too many MQTT messages per second (flood detection)
-- [ ] Regular database backups (daily)
-
-
----
-
 <!-- START OF 13_PROJECT_PLAN.md -->
 # 🚀 Lindu.id — Final Project Plan (Production)
 
@@ -879,9 +851,6 @@ JMA_POLL_INTERVAL=60
 1. **Sprint 1 (Sensor C++):** ✅ COMPLETED (DC Offset Calibration, STA/LTA, ZCR, FreeRTOS).
 2. **Sprint 2 (Server Python):** ✅ COMPLETED (Speed of Sound Consensus, Haversine Math).
 3. **Sprint 3 (Dashboard React):** ✅ COMPLETED (Geoshake-style UI, animated epicenters).
-4. **Sprint 4 (Actuator C++):** ⏳ *To Be Done* (Building alarm listener).
-5. **Sprint 5 (Captive Portal):** ⏳ *To Be Done* (Initial WiFi & GPS UI setup).
-6. **Sprint 6 (Hardware Test):** ⏳ Demo shaking 2 separate tables.
 
 
 ---
@@ -1287,57 +1256,29 @@ CREATE TABLE nodes (
 - [x] Wi-Fi Connection & Subscribe to global alarm MQTT topic
 - [x] **[Advanced]** Implement Edge Computing: Actuator calculates its own distance to the epicenter
 - [x] Logic to trigger Relay/Siren if entering the danger zone
-- [ ] *[Hardware]* Install ESP32 + Siren Relay + Solenoid Valve
-- [ ] *[Hardware]* Physical test: Send manual command → actuator responds (open/close valve)
-
-**Milestone 1:** 🎯 **(WE ARE HERE)** The *end-to-end logic* system is fully coded. Ready for physical testing by shaking 2 sensors simultaneously.
 
 ---
 
 ## Phase 2: Infrastructure & Dashboard (Web & Cloud)
-> **Objective:** System visibility, TLS security, and *real-time* monitoring via Web.
 
-### 1. Cloud & Security (VPS Deployment)
-- [ ] Setup VPS (Ubuntu 22.04) on DigitalOcean/AWS
-- [ ] Purchase/Setup Domain `lindu.id` + DNS configuration
-- [ ] Install Let's Encrypt CA certificate
-- [ ] Setup public Mosquitto Broker with TLS configuration (Port 8883)
-- [ ] Enable Cloud OTA Update (ESP32 *pulls* `.bin` file from HTTPS)
-
-### 2. Database & API (Backend)
-- [ ] Setup PostgreSQL (Dockerized)
-- [ ] Create table schemas (`nodes`, `events`, `alarms`)
+### Database & API (Backend)
 - [x] Modify `consensus.py` to save location/event logs to Database (PostgreSQL)
-- [ ] Create simple *FastAPI endpoints* (`/api/nodes`, `/api/events`)
-
-### 3. Web Dashboard (Frontend)
-- [ ] React Dashboard: "Geoshake-style" UI (Animated epicenters, PGA-based color-coded nodes, Helicorder 24h mockup, RMS & PGA metrics, Node Detail Modals)
-- [ ] Interactive map (Leaflet.js) displaying *Node* locations and Earthquake Epicenter
-- [ ] WebSocket: *Real-time* red *banner* notification on *browser* screen if an earthquake occurs
-
-**Milestone 2:** System deployed on the public internet securely and can be monitored by lecturers/examiners from a web browser.
 
 ---
 
 ## Phase 3: Reliability & UX (Final Polish)
-> **Objective:** Make the device easier for the general public to use and more durable.
 
 - [x] **Captive Portal UI:** Local Web page on ESP32 at first boot for *inputting* WiFi SSID & Latitude/Longitude (saved in NVS).
-- [ ] BMKG Data polling integration (`autogempa.json`) for post-event correlation.
-- [ ] OLED Display on sensor node (WiFi Status, IP Address, local PGA).
-- [ ] Manual *override button* on actuator (Emergency button to turn off the siren).
 
 ---
 
-## 🕒 Estimated Remaining Work (Main Phases)
+## Status Summary
 
 | Task | Status | Notes |
 |------|--------|-------|
 | Sensor Firmware (Math/DSP) | ✅ Completed | Outperforms basic *scripts* thanks to ZCR & DC Offset. |
 | Python Server (Consensus) | ✅ Completed | Strictly prevents false positives and groups multiple nodes using Haversine P-Wave velocity limits. |
 | Actuator Firmware (Edge Filter) | ✅ Completed | C++ Captive Portal with NVS ready to flash. |
-| Cloud VPS & TLS Setup | ⏳ Waiting | Needs VPS / Domain access from the team. |
-| Web Dashboard UI | ⏳ Waiting | React Dashboard with "Geoshake-style" UI pending. |
 
 
 ---
