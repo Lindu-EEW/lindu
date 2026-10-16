@@ -1,0 +1,15 @@
+{
+  "total_telemetry_records": 30228,
+  "total_feature_windows": 3021,
+  "window_duration_samples": 10,
+  "class_distribution": {
+    "NORMAL_BASELINE": 1953,
+    "SHOCK_VIBRATION": 964,
+    "GAS_HAZARD": 104
+  },
+  "nodes": [
+    "node_3c096f0c",
+    "node_2418399e",
+    "node_acbd13f9"
+  ]
+}
