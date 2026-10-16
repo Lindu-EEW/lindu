@@ -1,11 +1,11 @@
 {
-  "total_telemetry_records": 30228,
-  "total_feature_windows": 3021,
+  "total_telemetry_records": 34594,
+  "total_feature_windows": 3458,
   "window_duration_samples": 10,
   "class_distribution": {
-    "NORMAL_BASELINE": 1953,
-    "SHOCK_VIBRATION": 964,
-    "GAS_HAZARD": 104
+    "NORMAL_BASELINE": 2225,
+    "SHOCK_VIBRATION": 1130,
+    "GAS_HAZARD": 103
   },
   "nodes": [
     "node_3c096f0c",
