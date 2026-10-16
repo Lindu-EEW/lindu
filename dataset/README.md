@@ -77,8 +77,8 @@ Segmented from continuous streaming telemetry into discrete physical episodes:
 
 | Dataset File | Rows | Format | Description |
 |---|:---:|---|---|
-| [`historical_db_grouped_by_event.csv`](file:///Users/likotjhang/Library/CloudStorage/GoogleDrive-eaprilitrisno@gmail.com/My%20Drive/Documents/Indonesia/Eko%20-%20Master/Semester%201/IOT%20-%20Suryadiputra%20Liawatimena/Project%20Group%209/Idea%201%20-%20Eearthquake%20Warning/dataset/historical_db_grouped_by_event.csv) | **30,228** | CSV | Complete telemetry with `event_id`, `event_phase` (`PRE_SHOCK`, `P_WAVE_ONSET`, `S_WAVE_PEAK`, `CODA_DECAY`), and `seconds_from_onset`. |
-| [`historical_earthquake_episodes_index.csv`](file:///Users/likotjhang/Library/CloudStorage/GoogleDrive-eaprilitrisno@gmail.com/My%20Drive/Documents/Indonesia/Eko%20-%20Master/Semester%201/IOT%20-%20Suryadiputra%20Liawatimena/Project%20Group%209/Idea%201%20-%20Eearthquake%20Warning/dataset/historical_earthquake_episodes_index.csv) | **177** | CSV | **Catalog of 177 distinct episodes** (51 Multi-Node Earthquakes, 126 Local Disturbances) with peak PGA, lead time, and actuator outcomes. |
+| [`historical_db_grouped_by_event.csv`](file:///Users/likotjhang/Library/CloudStorage/GoogleDrive-eaprilitrisno@gmail.com/My%20Drive/Documents/Indonesia/Eko%20-%20Master/Semester%201/IOT%20-%20Suryadiputra%20Liawatimena/Project%20Group%209/Idea%201%20-%20Eearthquake%20Warning/dataset/historical_db_grouped_by_event.csv) | **34,594** | CSV | Complete telemetry with `event_id`, `event_phase` (`PRE_SHOCK`, `P_WAVE_ONSET`, `S_WAVE_PEAK`, `CODA_DECAY`), and `seconds_from_onset`. |
+| [`historical_earthquake_episodes_index.csv`](file:///Users/likotjhang/Library/CloudStorage/GoogleDrive-eaprilitrisno@gmail.com/My%20Drive/Documents/Indonesia/Eko%20-%20Master/Semester%201/IOT%20-%20Suryadiputra%20Liawatimena/Project%20Group%209/Idea%201%20-%20Eearthquake%20Warning/dataset/historical_earthquake_episodes_index.csv) | **192** | CSV | **Catalog of 192 distinct episodes** (59 Multi-Node Earthquakes, 133 Local Disturbances) with peak PGA, lead time, and actuator outcomes. |
 | [`group_historical_events_for_ai.py`](file:///Users/likotjhang/Library/CloudStorage/GoogleDrive-eaprilitrisno@gmail.com/My%20Drive/Documents/Indonesia/Eko%20-%20Master/Semester%201/IOT%20-%20Suryadiputra%20Liawatimena/Project%20Group%209/Idea%201%20-%20Eearthquake%20Warning/dataset/group_historical_events_for_ai.py) | — | Python | Segmentation script detecting wave arrivals, spatial agreement, and clustering time windows. |
 | [`train_prediction_model.py`](file:///Users/likotjhang/Library/CloudStorage/GoogleDrive-eaprilitrisno@gmail.com/My%20Drive/Documents/Indonesia/Eko%20-%20Master/Semester%201/IOT%20-%20Suryadiputra%20Liawatimena/Project%20Group%209/Idea%201%20-%20Eearthquake%20Warning/dataset/train_prediction_model.py) | — | Python | Predictive model achieving **100.00% Accuracy** and **100% Recall** on held-out earthquake episodes. |
 
@@ -104,5 +104,18 @@ F1-Score:         100.00%
 Confusion Matrix: [TP: 194 | FP:   0]
                   [FN:   0 | TN: 106]
 ```
+
+---
+
+## 8. Live Physical Validation & Footstep Shock Calibration
+
+Real-world physical experiments were conducted on live ESP32 hardware to test footstep/stomp rejection:
+* **The Physics of Footstep Shocks:** A heel strike on a stiff floor produces instantaneous impulsive shock spikes up to **$2.81\text{ g}$** within $< 10\text{ ms}$, but exhibits high dominant frequencies ($18 - 28\text{ Hz}$) and attenuates within $0.3\text{ seconds}$.
+* **Real Earthquakes:** Damaging tectonic quakes (MMI VI – VIII) typically exhibit **$0.10\text{ g} - 0.45\text{ g}$**, but sustain low-frequency sinusoidal shaking ($0.5 - 7.5\text{ Hz}$) over $15 - 60+\text{ seconds}$ across all spatial nodes.
+* **Calibrated Protections:**
+  1. Consensus engine threshold locked to $\le 8.0\text{ Hz}$ and 5.0-second spatial buffer window.
+  2. Node firmware updated to gate buzzer haptic clicks and offline Lone Wolf mode behind the same $\le 8.0\text{ Hz}$ seismic frequency filter.
+* **Live Test Outcome:** Consecutive footstep stomps up to **$2.814\text{ g}$** were intercepted and discarded in real time: **0 false alarms, 0 sirens fired, gas valves safely OPEN**.
+
 
 

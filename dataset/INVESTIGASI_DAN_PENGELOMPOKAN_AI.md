@@ -217,3 +217,45 @@ Model prediksi AI yang **hanya dilatih pada data simulasi** diuji secara langsun
 * **F1-Score:** **83.87%**
 
 > **Kesimpulan:** Data simulasi **sangat cocok dan akurat** dalam merepresentasikan perilaku fisika sensor nyata di database. Model AI yang dilatih dengan data simulasi mampu langsung mendeteksi gempa riil dengan tingkat akurasi ~90% dan menyaring gangguan domestik secara efektif.
+
+---
+
+## 10. Validasi Fisik Lapangan: Penanganan Gangguan Hentakan Kaki (*Stomp Shock*) & Kalibrasi Frekuensi Seismik
+
+### A. Investigasi Insiden Lapangan (*Live Stomp Incident*)
+Pada pengujian fisik langsung (16 Oktober 2026, 23:34 – 23:54 WIB), pengguna melakukan simulasi getaran domestik berupa berjalan dan menghentakkan kaki (*stomp*) di dekat sensor fisik:
+* **Hasil Pengamatan Telemetri:** Langkah kaki menghasilkan lonjakan percepatan sesaat (*impulsive spike*) hingga **$\text{PGA} = 1.35\text{ g} - 2.81\text{ g}$** dengan frekuensi $18 - 28\text{ Hz}$.
+* **Identifikasi Kelemahan Sistem Lama:**
+  1. *Filter Frekuensi Heuristik Terlalu Longgar:* Server lama menggunakan batas `freq_hz <= 20 Hz`. Hentakan $18 - 19\text{ Hz}$ lolos sebagai kandidat gempa.
+  2. *Buffer Window 60 Detik Terlalu Lebar:* Server mencocokkan getaran langkah kaki dengan getaran acak di node lain yang terjadi puluhan detik sebelumnya, memicu alarm konsensus palsu (`trigger_siren`).
+  3. *Buzzer Lokal di Node:* Firmware lama membunyikan buzzer haptic tick seketika saat $\text{PGA} > 0.12\text{ g}$ tanpa memverifikasi spektrum frekuensi seismik.
+
+### B. Mengapa Hentakan Kaki Bisa Mencapai $> 2\text{ G}$, Padahal Gempa Nyata Seringkali $< 0.5\text{ G}$?
+Dalam seismologi dan dinamika struktur, terdapat perbedaan mendasar antara **percepatan impulsif benturan lokal** vs **gelombang elastis seismik tektonik**:
+
+| Parameter Fisik | Hentakan Kaki / Benturan Lokal (*Stomp*) | Gempa Bumi Tektonik Riil (*Earthquake*) |
+|---|---|---|
+| **Mekanisme Pemicu** | Benturan tumit ke lantai keras dalam fraksi waktu sangat singkat ($\Delta t < 10\text{ ms}$). Sesuai hukum impuls $a = \frac{\Delta v}{\Delta t}$, perlambatan instan menghasilkan lonjakan sesaat $a$ hingga **$1.5\text{ g} - 3.5\text{ g}$**. | Pelepasan energi sesar bumi puluhan kilometer di dalam tanah yang merambat melalui mantel dan kerak bumi. |
+| **Rentang PGA Lapangan** | **$0.5\text{ g} - 3.0+\text{ g}$** (Sangat tinggi secara lokal pada sensor terdekat). | **$0.05\text{ g} - 0.45\text{ g}$** untuk gempa merusak (MMI VI – VIII). Sangat jarang melampaui $1.0\text{ g}$ kecuali gempa katastropik $M > 8$. |
+| **Spektrum Frekuensi** | **Tinggi:** $15 - 45\text{ Hz}$ (getaran akustik/mekanik kaku). | **Rendah:** $0.5 - 7.5\text{ Hz}$ (gelombang panjang elastis bumi). |
+| **Durasi Getaran** | **Sangat Singkat:** $< 0.4\text{ detik}$, langsung teredam (*damped*). | **Kontinu & Berkelanjutan:** $15 - 60+\text{ detik}$ berosilasi sinusoidal. |
+| **Korelasi Spasial** | **Terisolasi:** Hanya mengguncang 1 sensor terdekat, sensor di ruangan lain $0.00\text{ g}$. | **Multi-Node:** Seluruh bangunan dan lingkungan berguncang bersamaan. |
+
+### C. Implementasi Perbaikan Source Code (Server & Firmware)
+1. **Server Consensus Engine ([`src/server/consensus.py`](file:///Users/likotjhang/Library/CloudStorage/GoogleDrive-eaprilitrisno@gmail.com/My%20Drive/Documents/Indonesia/Eko%20-%20Master/Semester%201/IOT%20-%20Suryadiputra%20Liawatimena/Project%20Group%209/Idea%201%20-%20Eearthquake%20Warning/src/server/consensus.py)):**
+   * Filter frekuensi diperketat menjadi **$\le 8.0\text{ Hz}$** (`is_seismic_freq = (freq_hz == 0 or (0.5 <= freq_hz <= 8.0))`).
+   * Jendela buffer konsensus diperpendek dari 60 detik menjadi **5.0 detik**.
+   * Validasi kecepatan rambat gelombang P-wave diperketat ke rentang fisik **$1.5 - 12.0\text{ km/s}$**.
+2. **Firmware Sensor Node ([`src/esp32_sensor_node/src/main.cpp`](file:///Users/likotjhang/Library/CloudStorage/GoogleDrive-eaprilitrisno@gmail.com/My%20Drive/Documents/Indonesia/Eko%20-%20Master/Semester%201/IOT%20-%20Suryadiputra%20Liawatimena/Project%20Group%209/Idea%201%20-%20Eearthquake%20Warning/src/esp32_sensor_node/src/main.cpp) & [`SensorManager.cpp`](file:///Users/likotjhang/Library/CloudStorage/GoogleDrive-eaprilitrisno@gmail.com/My%20Drive/Documents/Indonesia/Eko%20-%20Master/Semester%201/IOT%20-%20Suryadiputra%20Liawatimena/Project%20Group%209/Idea%201%20-%20Eearthquake%20Warning/src/esp32_sensor_node/src/SensorManager.cpp)):**
+   * Filter seismik $\le 8\text{ Hz}$ disisipkan sebelum mengaktifkan state alarm lokal atau membunyikan buzzer haptic tick.
+   * *Lone Wolf Mode* offline diproteksi agar hanya merespon getaran ekstrem yang memiliki spektrum frekuensi seismik.
+
+### D. Hasil Pengujian Live Pasca-Deploy
+Pengguna melakukan pengujian hentakan lantai berulang kali:
+* `node_acbd13f9`: Hentakan $0.625\text{ g}$ ($19\text{ Hz}$) $\rightarrow$ **Ditolak oleh filter server** (`Hentakan Kaki/Domestic Shock`).
+* `node_2418399e`: Hentakan $2.814\text{ g}$ ($22\text{ Hz}$) $\rightarrow$ **Ditolak oleh filter server** (`Hentakan Kaki/Domestic Shock`).
+* **Hasil:**
+  * **False Alarm Rate:** **0% (Zero False Alarms)**. Tidak ada sirine darurat yang berbunyi.
+  * **Status Solenoid Valve:** Tetap aman (`ENABLED`).
+  * **Kompilasi Firmware:** Berhasil 100% untuk environment `esp32s3` dan `esp32_wroom`.
+
