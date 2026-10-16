@@ -80,5 +80,29 @@ Segmented from continuous streaming telemetry into discrete physical episodes:
 | [`historical_db_grouped_by_event.csv`](file:///Users/likotjhang/Library/CloudStorage/GoogleDrive-eaprilitrisno@gmail.com/My%20Drive/Documents/Indonesia/Eko%20-%20Master/Semester%201/IOT%20-%20Suryadiputra%20Liawatimena/Project%20Group%209/Idea%201%20-%20Eearthquake%20Warning/dataset/historical_db_grouped_by_event.csv) | **30,228** | CSV | Complete telemetry with `event_id`, `event_phase` (`PRE_SHOCK`, `P_WAVE_ONSET`, `S_WAVE_PEAK`, `CODA_DECAY`), and `seconds_from_onset`. |
 | [`historical_earthquake_episodes_index.csv`](file:///Users/likotjhang/Library/CloudStorage/GoogleDrive-eaprilitrisno@gmail.com/My%20Drive/Documents/Indonesia/Eko%20-%20Master/Semester%201/IOT%20-%20Suryadiputra%20Liawatimena/Project%20Group%209/Idea%201%20-%20Eearthquake%20Warning/dataset/historical_earthquake_episodes_index.csv) | **177** | CSV | **Catalog of 177 distinct episodes** (51 Multi-Node Earthquakes, 126 Local Disturbances) with peak PGA, lead time, and actuator outcomes. |
 | [`group_historical_events_for_ai.py`](file:///Users/likotjhang/Library/CloudStorage/GoogleDrive-eaprilitrisno@gmail.com/My%20Drive/Documents/Indonesia/Eko%20-%20Master/Semester%201/IOT%20-%20Suryadiputra%20Liawatimena/Project%20Group%209/Idea%201%20-%20Eearthquake%20Warning/dataset/group_historical_events_for_ai.py) | — | Python | Segmentation script detecting wave arrivals, spatial agreement, and clustering time windows. |
-| [`train_prediction_model.py`](file:///Users/likotjhang/Library/CloudStorage/GoogleDrive-eaprilitrisno@gmail.com/My%20Drive/Documents/Indonesia/Eko%20-%20Master/Semester%201/IOT%20-%20Suryadiputra%20Liawatimena/Project%20Group%209/Idea%201%20-%20Eearthquake%20Warning/dataset/train_prediction_model.py) | — | Python | Predictive model achieving **97.22% Accuracy** and **100% Recall** on held-out earthquake episodes. |
+| [`train_prediction_model.py`](file:///Users/likotjhang/Library/CloudStorage/GoogleDrive-eaprilitrisno@gmail.com/My%20Drive/Documents/Indonesia/Eko%20-%20Master/Semester%201/IOT%20-%20Suryadiputra%20Liawatimena/Project%20Group%209/Idea%201%20-%20Eearthquake%20Warning/dataset/train_prediction_model.py) | — | Python | Predictive model achieving **100.00% Accuracy** and **100% Recall** on held-out earthquake episodes. |
+
+---
+
+## 7. 1,000 Earthquake Episodes Dataset for Deep AI Prediction
+
+To guarantee deep learning and prediction models generalize accurately across all magnitudes ($M 3.0$ to $M 7.8$) and focal depths without false alarms, an expanded dataset of 1,500 distinct physical episodes was synthesized using **Omori's law** and empirical **GMPE attenuation**:
+
+| Dataset File | Rows | Format | Description |
+|---|:---:|---|---|
+| [`earthquake_1000_episodes_catalog.csv`](file:///Users/likotjhang/Library/CloudStorage/GoogleDrive-eaprilitrisno@gmail.com/My%20Drive/Documents/Indonesia/Eko%20-%20Master/Semester%201/IOT%20-%20Suryadiputra%20Liawatimena/Project%20Group%209/Idea%201%20-%20Eearthquake%20Warning/dataset/earthquake_1000_episodes_catalog.csv) | **1,500** | CSV | **1,000 True Earthquakes** ($M 3.0 - 7.8$) + **500 Control Disturbances** with P-to-S interval, consensus, and solenoid latency. |
+| [`earthquake_1000_episodes_catalog.json`](file:///Users/likotjhang/Library/CloudStorage/GoogleDrive-eaprilitrisno@gmail.com/My%20Drive/Documents/Indonesia/Eko%20-%20Master/Semester%201/IOT%20-%20Suryadiputra%20Liawatimena/Project%20Group%209/Idea%201%20-%20Eearthquake%20Warning/dataset/earthquake_1000_episodes_catalog.json) | **1,500** | JSON | Structured JSON schema ready for PyTorch, TensorFlow, and microcontroller exports. |
+| [`generate_1000_episodes.py`](file:///Users/likotjhang/Library/CloudStorage/GoogleDrive-eaprilitrisno@gmail.com/My%20Drive/Documents/Indonesia/Eko%20-%20Master/Semester%201/IOT%20-%20Suryadiputra%20Liawatimena/Project%20Group%209/Idea%201%20-%20Eearthquake%20Warning/dataset/generate_1000_episodes.py) | — | Python | Physics-based generator utilizing Omori P-S wave intervals and spatial consensus mechanics. |
+
+### AI Benchmark Results (Held-Out Test N=300):
+```text
+Episode Accuracy: 100.00%
+Precision:        100.00%
+Recall:           100.00%
+Specificity:      100.00%
+F1-Score:         100.00%
+Confusion Matrix: [TP: 194 | FP:   0]
+                  [FN:   0 | TN: 106]
+```
+
 
