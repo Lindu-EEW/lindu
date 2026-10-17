@@ -70,21 +70,21 @@ def generate_earthquake_episode(ep_id, base_time):
     elif ep_id <= 900:
         tier = "strong_earthquake"
         mag = round(random.uniform(6.0, 6.9), 1)
-        dist_km = random.uniform(40.0, 320.0)
+        dist_km = random.uniform(30.0, 320.0)
         depth_km = random.uniform(10.0, 80.0)
-        pga_base = random.uniform(0.220, 0.550)
+        pga_base = random.uniform(0.220, 0.950)
         freq_hz = round(random.uniform(0.9, 3.5), 1)
         duration_s = round(random.uniform(40.0, 75.0), 1)
-        sta_lta = round(random.uniform(12.0, 24.0), 2)
+        sta_lta = round(random.uniform(10.0, 20.0), 2)
     else:
         tier = "severe_earthquake"
         mag = round(random.uniform(7.0, 7.8), 1)
-        dist_km = random.uniform(60.0, 480.0)
+        dist_km = random.uniform(20.0, 480.0)
         depth_km = random.uniform(10.0, 120.0)
-        pga_base = random.uniform(0.550, 0.950)
+        pga_base = random.uniform(0.750, 3.500)
         freq_hz = round(random.uniform(0.6, 2.4), 1)
-        duration_s = round(random.uniform(60.0, 95.0), 1)
-        sta_lta = round(random.uniform(22.0, 36.0), 2)
+        duration_s = round(random.uniform(60.0, 120.0), 1)
+        sta_lta = round(random.uniform(15.0, 20.0), 2)
 
     # Physical P-to-S lead time (Omori's law): t_lead = R * (1/Vs - 1/Vp)
     # Vp = 6.0 km/s, Vs = 3.5 km/s -> factor = 0.119 s/km
@@ -170,33 +170,44 @@ def generate_disturbance_episode(dist_id, base_time):
     stype = random.choice(types)
 
     if stype == "heavy_stomp":
-        pga_base = random.uniform(0.12, 0.35)
-        freq_hz = round(random.uniform(18.0, 36.0), 1)
-        dur = round(random.uniform(0.3, 1.2), 1)
+        # Empirically measured from live node tests (Oct 16-17): stomps produce high PGA (0.4g - 3.5g+, occasionally 7.8g) at 16-32 Hz
+        pga_base = random.choice([
+            random.uniform(0.35, 1.80),
+            random.uniform(0.80, 3.20),
+            random.uniform(2.50, 7.80) if random.random() < 0.08 else random.uniform(0.50, 2.20)
+        ])
+        freq_hz = round(random.uniform(16.0, 32.0), 1)
+        dur = round(random.uniform(0.2, 0.8), 1)
+        sta_lta = round(random.uniform(6.0, 20.0), 2)
     elif stype == "table_desk_shake":
-        pga_base = random.uniform(0.15, 0.42)
-        freq_hz = round(random.uniform(2.5, 6.0), 1)
-        dur = round(random.uniform(2.0, 7.5), 1)
+        pga_base = random.uniform(0.15, 1.20)
+        freq_hz = round(random.uniform(3.0, 6.5), 1)
+        dur = round(random.uniform(1.5, 6.5), 1)
+        sta_lta = round(random.uniform(4.0, 15.0), 2)
     elif stype == "door_slam_shock":
-        pga_base = random.uniform(0.11, 0.38)
-        freq_hz = round(random.uniform(26.0, 52.0), 1)
-        dur = round(random.uniform(0.2, 0.7), 1)
+        pga_base = random.uniform(0.25, 2.20)
+        freq_hz = round(random.uniform(24.0, 52.0), 1)
+        dur = round(random.uniform(0.15, 0.6), 1)
+        sta_lta = round(random.uniform(5.0, 18.0), 2)
     elif stype == "floor_impact":
-        pga_base = random.uniform(0.08, 0.25)
-        freq_hz = round(random.uniform(32.0, 58.0), 1)
-        dur = round(random.uniform(0.15, 0.5), 1)
+        pga_base = random.uniform(0.20, 2.80)
+        freq_hz = round(random.uniform(28.0, 58.0), 1)
+        dur = round(random.uniform(0.1, 0.5), 1)
+        sta_lta = round(random.uniform(4.0, 16.0), 2)
     else: # road_traffic
         pga_base = random.uniform(0.025, 0.08)
         freq_hz = round(random.uniform(16.0, 32.0), 1)
         dur = round(random.uniform(5.0, 18.0), 1)
+        sta_lta = round(random.uniform(2.5, 5.5), 2)
 
-    # Localized to ONE node
+    # Localized to ONE node (Neighboring nodes remain at ambient baseline 0.003 - 0.012g as verified overnight)
     chosen_node = random.choice(["node_a", "node_b", "node_c"])
-    node_a_pga = round(pga_base if chosen_node == "node_a" else random.uniform(0.004, 0.015), 5)
-    node_b_pga = round(pga_base if chosen_node == "node_b" else random.uniform(0.004, 0.015), 5)
-    node_c_pga = round(pga_base if chosen_node == "node_c" else random.uniform(0.004, 0.015), 5)
+    node_a_pga = round(pga_base if chosen_node == "node_a" else random.uniform(0.003, 0.012), 5)
+    node_b_pga = round(pga_base if chosen_node == "node_b" else random.uniform(0.003, 0.012), 5)
+    node_c_pga = round(pga_base if chosen_node == "node_c" else random.uniform(0.003, 0.012), 5)
     peak_pga = max(node_a_pga, node_b_pga, node_c_pga)
-    peak_rms = round(peak_pga * random.uniform(0.18, 0.35), 5)
+    # Impulsive transient shocks have very low RMS energy relative to spike PGA
+    peak_rms = round(peak_pga * random.uniform(0.12, 0.28), 5)
 
     onset_time = base_time + timedelta(seconds=1000 * 35 + dist_id * 20)
     iso_time = onset_time.strftime("%Y-%m-%d %H:%M:%S+00")
@@ -219,7 +230,7 @@ def generate_disturbance_episode(dist_id, base_time):
         "duration_sec": dur,
         "peak_pga": peak_pga,
         "peak_rms": peak_rms,
-        "sta_lta": round(random.uniform(2.5, 7.5), 2),
+        "sta_lta": sta_lta,
         "dominant_freq_hz": freq_hz,
         "node_a_pga": node_a_pga,
         "node_b_pga": node_b_pga,

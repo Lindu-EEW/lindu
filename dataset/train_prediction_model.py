@@ -116,7 +116,8 @@ def train_prediction_model():
             true_label = 1 if ep["category"] == "MULTI_NODE_EARTHQUAKE" else 0
             # map available features
             pga = float(ep["peak_pga"])
-            rms = float(ep["peak_rms"])
+            # Historical DB records RMS in m/s^2; convert to g (divide by 9.81) to match catalog unit
+            rms = float(ep["peak_rms"]) / 9.81
             nodes = float(ep["node_count"])
             dur = float(ep["duration_sec"])
             freq = 2.5 if true_label == 1 else 25.0 # default spectral separation

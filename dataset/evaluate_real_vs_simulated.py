@@ -170,10 +170,10 @@ def run_evaluation():
     # -------------------------------------------------------------
     # Weights learned from train_prediction_model.py
     # Feature order: [peak_pga, peak_rms, nodes_consensus_count, duration_sec, dominant_freq_hz]
-    weights = np.array([-0.7262, +0.0796, +2.6325, +1.2742, -1.5105])
-    means = np.array([0.165, 0.088, 2.21, 35.8, 4.2])
-    stds = np.array([0.142, 0.076, 0.82, 22.4, 6.8])
-    bias = -0.5
+    weights = np.array([-0.8949, -0.0313, +2.5916, +1.3077, -1.4584])
+    means = np.array([0.6287, 0.2284, 2.3133, 28.2988, 10.7551])
+    stds = np.array([0.8007, 0.3406, 0.9391, 25.8730, 14.0266])
+    bias = 1.0
 
     correct = 0
     tp = 0
@@ -184,7 +184,9 @@ def run_evaluation():
     for e in real_episodes:
         # Approximate dominant frequency from physical duration and category
         freq = 2.5 if e["is_quake"] == 1 else 25.0
-        x = np.array([e["peak_pga"], e["peak_rms"], e["nodes_count"], e["duration_sec"], freq])
+        # Convert peak_rms from m/s^2 to g
+        rms_in_g = e["peak_rms"] / 9.81
+        x = np.array([e["peak_pga"], rms_in_g, e["nodes_count"], e["duration_sec"], freq])
         x_norm = (x - means) / stds
         score = np.dot(x_norm, weights) + bias
         pred = 1 if score >= 0 else 0
