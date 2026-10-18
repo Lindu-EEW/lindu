@@ -143,9 +143,10 @@ def train_prediction_model():
         print("\n" + "=" * 65)
         print(f"  CROSS-VALIDATION ON PHYSICAL DATABASE (N = {h_total} real episodes)")
         print("=" * 65)
-        print(f"  • Accuracy on Real DB Episodes: {h_acc * 100:.2f}%")
-        print(f"  • Real Multi-Node Quakes Detected: {h_tp}/{h_tp + h_fn} (100.0% Recall)")
-        print(f"  • Real Local Bumps Filtered:      {h_tn}/{h_tn + h_fp} (100.0% Specificity)")
+        h_recall = h_tp / (h_tp + h_fn) * 100 if (h_tp + h_fn) > 0 else 0
+        h_spec = h_tn / (h_tn + h_fp) * 100 if (h_tn + h_fp) > 0 else 0
+        print(f"  • Real Multi-Node Quakes Detected: {h_tp}/{h_tp + h_fn} ({h_recall:.1f}% Recall)")
+        print(f"  • Real Local Bumps Filtered:      {h_tn}/{h_tn + h_fp} ({h_spec:.1f}% Specificity)")
 
     print("\nModel trained and validated successfully across 1,000+ earthquake episodes.")
 
