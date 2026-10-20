@@ -85,6 +85,13 @@ One row is written each time an actuator changes state. The firmware publishes t
 
 Coverage: the LED logs the alarm mode only, not its colour or blink pattern; the buzzer logs the siren only, not the short haptic ticks. The rows come from functional tests (door and valve cycles, simulated earthquake alarms), not from natural events.
 
+| Dataset File | Rows | Format | Description |
+|---|:---:|---|---|
+| [`historical_db_grouped_by_event.csv`](file:///Users/likotjhang/Library/CloudStorage/GoogleDrive-eaprilitrisno@gmail.com/My%20Drive/Documents/Indonesia/Eko%20-%20Master/Semester%201/IOT%20-%20Suryadiputra%20Liawatimena/Project%20Group%209/Idea%201%20-%20Eearthquake%20Warning/dataset/historical_db_grouped_by_event.csv) | **34,594** | CSV | Telemetry with `event_id`, `event_phase` (`PRE_SHOCK`, `P_WAVE_ONSET`, `S_WAVE_PEAK`, `CODA_DECAY`), and `seconds_from_onset`. |
+| [`historical_earthquake_episodes_index.csv`](file:///Users/likotjhang/Library/CloudStorage/GoogleDrive-eaprilitrisno@gmail.com/My%20Drive/Documents/Indonesia/Eko%20-%20Master/Semester%201/IOT%20-%20Suryadiputra%20Liawatimena/Project%20Group%209/Idea%201%20-%20Eearthquake%20Warning/dataset/historical_earthquake_episodes_index.csv) | **1,255** | CSV | **Catalog of 1,255 distinct episodes** (117 Multi-Node Earthquakes, 1,138 Local Disturbances) with peak PGA, lead time, and actuator outcomes. |
+| [`update_historical_episodes_from_db.py`](file:///Users/likotjhang/Library/CloudStorage/GoogleDrive-eaprilitrisno@gmail.com/My%20Drive/Documents/Indonesia/Eko%20-%20Master/Semester%201/IOT%20-%20Suryadiputra%20Liawatimena/Project%20Group%209/Idea%201%20-%20Eearthquake%20Warning/dataset/update_historical_episodes_from_db.py) | — | Python | Segmentation script detecting wave arrivals, spatial agreement, and clustering time windows directly from live TimescaleDB. |
+| [`train_prediction_model.py`](file:///Users/likotjhang/Library/CloudStorage/GoogleDrive-eaprilitrisno@gmail.com/My%20Drive/Documents/Indonesia/Eko%20-%20Master/Semester%201/IOT%20-%20Suryadiputra%20Liawatimena/Project%20Group%209/Idea%201%20-%20Eearthquake%20Warning/dataset/train_prediction_model.py) | — | Python | Predictive model achieving **98.8% Accuracy** and **96.5% Recall** across all 1,255 real physical episodes. |
+
 ## 2. DERIVED_FROM_REAL
 
 | File | Rows | Built from | Script |

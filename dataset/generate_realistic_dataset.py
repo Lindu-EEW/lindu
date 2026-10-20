@@ -154,9 +154,9 @@ def generate_sample(sample_id, event_type, base_time):
         # Localized to ONE node only (No Consensus!)
         nodes_triggered = 1
         consensus_reached = False
-        node_a_pga = pga if node_id == "node_acbd13f9" else random.uniform(0.005, 0.016)
-        node_b_pga = pga if node_id == "node_2418399e" else random.uniform(0.005, 0.016)
-        node_c_pga = pga if node_id == "node_3c096f0c" else random.uniform(0.005, 0.016)
+        node_a_pga = pga if node_id == "node_acbd13f9" else random.uniform(0.0010, 0.0035)
+        node_b_pga = pga if node_id == "node_2418399e" else random.uniform(0.0010, 0.0035)
+        node_c_pga = pga if node_id == "node_3c096f0c" else random.uniform(0.0010, 0.0035)
 
         # Dominant vertical Z axis
         ax = random.gauss(0, 0.03)
@@ -185,17 +185,17 @@ def generate_sample(sample_id, event_type, base_time):
         mag = 0.0
         mmi = "NONE"
         # High acceleration from manual human shaking
-        pga = random.uniform(0.150, 0.420)
-        sta_lta = random.uniform(4.0, 9.2)
+        pga = random.uniform(0.150, 0.950)
+        sta_lta = random.uniform(4.0, 11.0)
         freq_hz = random.uniform(2.5, 6.0) # Can match arm speed, but single-node only!
-        duration_s = random.uniform(2.0, 7.5)
+        duration_s = random.uniform(1.5, 7.5)
 
         # Localized to ONE desk/post
         nodes_triggered = 1
         consensus_reached = False
-        node_a_pga = pga if node_id == "node_acbd13f9" else random.uniform(0.004, 0.012)
-        node_b_pga = pga if node_id == "node_2418399e" else random.uniform(0.004, 0.012)
-        node_c_pga = pga if node_id == "node_3c096f0c" else random.uniform(0.004, 0.012)
+        node_a_pga = pga if node_id == "node_acbd13f9" else random.uniform(0.0010, 0.0035)
+        node_b_pga = pga if node_id == "node_2418399e" else random.uniform(0.0010, 0.0035)
+        node_c_pga = pga if node_id == "node_3c096f0c" else random.uniform(0.0010, 0.0035)
 
         # Erratic manual shaking, heavy jerk
         ax = (pga * g * random.uniform(0.7, 0.95)) * random.choice([-1, 1])
@@ -229,9 +229,9 @@ def generate_sample(sample_id, event_type, base_time):
 
         nodes_triggered = 1
         consensus_reached = False
-        node_a_pga = pga if node_id == "node_acbd13f9" else random.uniform(0.008, 0.022)
-        node_b_pga = pga if node_id == "node_2418399e" else random.uniform(0.008, 0.022)
-        node_c_pga = pga if node_id == "node_3c096f0c" else random.uniform(0.008, 0.022)
+        node_a_pga = pga if node_id == "node_acbd13f9" else random.uniform(0.0010, 0.0035)
+        node_b_pga = pga if node_id == "node_2418399e" else random.uniform(0.0010, 0.0035)
+        node_c_pga = pga if node_id == "node_3c096f0c" else random.uniform(0.0010, 0.0035)
 
         ax = (pga * g * random.uniform(0.8, 0.98)) * random.choice([-1, 1])
         ay = (pga * g * random.uniform(0.1, 0.3)) * random.choice([-1, 1])
@@ -264,9 +264,9 @@ def generate_sample(sample_id, event_type, base_time):
 
         nodes_triggered = 1
         consensus_reached = False
-        node_a_pga = pga if node_id == "node_acbd13f9" else random.uniform(0.003, 0.010)
-        node_b_pga = pga if node_id == "node_2418399e" else random.uniform(0.003, 0.010)
-        node_c_pga = pga if node_id == "node_3c096f0c" else random.uniform(0.003, 0.010)
+        node_a_pga = pga if node_id == "node_acbd13f9" else random.uniform(0.0010, 0.0035)
+        node_b_pga = pga if node_id == "node_2418399e" else random.uniform(0.0010, 0.0035)
+        node_c_pga = pga if node_id == "node_3c096f0c" else random.uniform(0.0010, 0.0035)
 
         ax = random.gauss(0, 0.04)
         ay = random.gauss(0, 0.04)
@@ -325,20 +325,20 @@ def generate_sample(sample_id, event_type, base_time):
         subtype = "sensor_ambient_drift"
         mag = 0.0
         mmi = "NONE"
-        pga = random.uniform(0.002, 0.014)
-        sta_lta = random.uniform(0.85, 1.60)
-        freq_hz = random.uniform(0.5, 3.5)
+        pga = random.uniform(0.0010, 0.0035)
+        sta_lta = random.uniform(0.28, 0.65)
+        freq_hz = random.uniform(18.0, 26.0)
         duration_s = random.uniform(5.0, 60.0)
 
         nodes_triggered = 0
         consensus_reached = False
-        node_a_pga = random.uniform(0.002, 0.012)
-        node_b_pga = random.uniform(0.002, 0.012)
-        node_c_pga = random.uniform(0.002, 0.012)
+        node_a_pga = random.uniform(0.0010, 0.0035)
+        node_b_pga = random.uniform(0.0010, 0.0035)
+        node_c_pga = random.uniform(0.0010, 0.0035)
 
-        ax = random.gauss(0, 0.01)
-        ay = random.gauss(0, 0.01)
-        az = random.gauss(0, 0.015)
+        ax = random.gauss(0, 0.002)
+        ay = random.gauss(0, 0.002)
+        az = random.gauss(0, 0.003)
         rms = pga * random.uniform(0.60, 0.85)
 
         solenoid_valve_status = "ENABLED"

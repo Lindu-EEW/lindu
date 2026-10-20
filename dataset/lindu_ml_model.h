@@ -12,10 +12,10 @@
 #define ML_NUM_FEATURES 6
 
 // Feature order: pga, sta_lta, freq_hz, rms, duration_s, p_to_s_ratio
-static const float ML_MEANS[6] = {0.167650f, 7.604420f, 12.011750f, 0.082071f, 21.913950f, 0.605856f};
-static const float ML_STDS[6]  = {0.203223f, 7.320262f, 13.760565f, 0.113894f, 19.507890f, 0.228757f};
-static const float ML_WEIGHTS[6] = {-0.262834f, 1.901669f, -3.787374f, 0.832697f, 0.477519f, -2.231301f};
-static const float ML_BIAS = 0.175546f;
+static const float ML_MEANS[6] = {0.189372f, 7.681914f, 14.518250f, 0.089389f, 21.913950f, 0.605856f};
+static const float ML_STDS[6]  = {0.228498f, 7.404773f, 12.862055f, 0.117197f, 19.507890f, 0.228757f};
+static const float ML_WEIGHTS[6] = {-0.377860f, 1.252306f, -3.959957f, 0.364124f, 1.158558f, -1.332820f};
+static const float ML_BIAS = 0.143630f;
 
 /**
  * Predicts seismic event probability on embedded ESP32.
