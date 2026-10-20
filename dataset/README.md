@@ -13,7 +13,7 @@ Every file here falls into one of four provenance classes. `MANIFEST.csv` lists 
 
 ## Methodology and limitations
 
-**Primary dataset.** The data acquisition dataset is the REAL_DEVICE group (section 1): sensor telemetry, node logs and alerts recorded by the prototype nodes into PostgreSQL over MQTT. It satisfies the requirement of a CSV with at least 1,000 timestamped records.
+**Primary dataset.** The data acquisition dataset is the REAL_DEVICE group (section 1): sensor telemetry, node logs, alerts, the heartbeat/PIR log and the actuator log recorded by the prototype nodes into PostgreSQL over MQTT. It satisfies the requirement of a CSV with at least 1,000 timestamped records.
 
 **Why synthetic data is also used.** Real tectonic ground motion of known magnitude cannot be produced on demand, and no damaging earthquake has been recorded by the prototype. Detection and actuator behavior for earthquake-class events is therefore evaluated on generated data, together with manual shake tests on the hardware.
 
@@ -25,19 +25,21 @@ Every file here falls into one of four provenance classes. `MANIFEST.csv` lists 
 
 **What this means for reporting.**
 - Metrics from synthetic files (100% accuracy, latency columns) show that the generated classes are separable and that the rule logic behaves as designed. They are not field performance.
-- Field-grounded figures are the real-episode evaluation (section 2) and the hardware trials in the project report (20 trials: alert latency 130.4 ms, solenoid 326.4 ms, gas isolation 167.6 ms).
+- Field-grounded figures are the real-episode evaluation (section 2) and the hardware trials in the project report (20 trials: alert latency 130.4 ms and solenoid 326.4 ms).
 - Synthetic files must be labeled as simulated whenever they are shown or cited.
 
 ---
 
 ## 1. REAL_DEVICE: measured by the prototype
 
+### 1.1 Telemetry, node logs and alerts
+
 Period: 2026-09-16 to 2026-10-16, collected continuously.
 
 | File | Rows | Content |
 |---|---:|---|
-| [`historical_db_telemetry_29k.csv`](historical_db_telemetry_29k.csv) | 34,594 | `sensor_telemetry`: time, node_id, pga, rms, accel x/y/z, temperature, pressure, gas_raw, gas_alert, valve_status, latency_ms |
-| [`historical_db_node_logs.csv`](historical_db_node_logs.csv) | 32,039 | Remote syslog per node (heartbeat, pose, actuator events) |
+| [`historical_db_telemetry_29k.csv`](historical_db_telemetry_29k.csv) | 34,594 | `sensor_telemetry`: time, node_id, pga, rms, accel x/y/z, temperature, pressure, valve_status, latency_ms and the remaining sensor columns |
+| [`historical_db_node_logs.csv`](historical_db_node_logs.csv) | 32,039 | Remote syslog per node (heartbeat, pose, OTA, I2C scan); contains no actuator events, see section 1.3 |
 | [`historical_db_alerts.csv`](historical_db_alerts.csv) | 118 | Consensus alerts with triggering nodes |
 
 Known limits:
@@ -45,6 +47,43 @@ Known limits:
 - `latency_ms` has negative values in some rows (clock offset between node and server).
 - In `historical_db_alerts.csv`, the epicenter equals the node coordinates, and `time_diff_s` and `measured_velocity_kms` are 0 in the sampled row. Check these before citing them as physical validation.
 - Some text columns show mojibake (`Â°`, `âš ï¸`) from an encoding mismatch; read with UTF-8 after re-export.
+
+### 1.2 Heartbeat and PIR log
+
+Exported by `prototype/grafana-stack/export_csv.py` on 2026-10-20.
+
+| File | Rows | Content |
+|---|---:|---|
+| [`node_heartbeat_pir_log.csv`](node_heartbeat_pir_log.csv) | 8,399 | Heartbeat about every 10 s: status, pose, tilt, firmware, OTA status, PIR `motion_detected` |
+
+`motion_detected` is empty for older heartbeat rows. `latency_ms` is empty or unreliable because the node and server clocks are not aligned.
+
+### 1.3 Actuator log
+
+| File | Rows | Content |
+|---|---:|---|
+| [`actuator_log.csv`](actuator_log.csv) | 560 | State changes of valve, door, buzzer and LED |
+
+One row is written each time an actuator changes state. The firmware publishes the event over MQTT (`lindu/sensor/<id>/actuator`) and the ingester stores it in the `actuator_log` table. Exported by `export_csv.py` on 2026-10-20.
+
+| Column | Meaning |
+|---|---|
+| `time` | Time the ingester received the event (UTC) |
+| `node_id` | Node that owns the actuator |
+| `actuator` | `valve`, `door`, `buzzer` or `led` |
+| `state` | New state (see below) |
+| `reason` | Cause inferred by the firmware from the alarm state at that moment |
+
+| Actuator | Device (Node B, ESP32 classic) | `state` values |
+|---|---|---|
+| `valve` | 12V solenoid valve | `OPEN`, `CLOSED` |
+| `door` | 12V solenoid door lock | `LOCKED`, `UNLOCKED` |
+| `buzzer` | Siren buzzer | `ON`, `OFF` |
+| `led` | RGB LED | `NORMAL`, `EARTHQUAKE` |
+
+`reason` values: `MANUAL_OR_RESET` (manual command, alarm cancel, or the state reported at boot), `EARTHQUAKE_ALARM` / `EARTHQUAKE` (earthquake alarm active), `ALARM_OCCUPANCY_PIR` (door unlocked during an alarm because the PIR saw movement in the last 10 minutes), `NORMAL`.
+
+Coverage: the LED logs the alarm mode only, not its colour or blink pattern; the buzzer logs the siren only, not the short haptic ticks. The rows come from functional tests (door and valve cycles, simulated earthquake alarms), not from natural events.
 
 ## 2. DERIVED_FROM_REAL
 
