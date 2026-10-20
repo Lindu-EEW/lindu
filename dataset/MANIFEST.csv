@@ -1,6 +1,8 @@
 file,provenance,rows,used_for,note
+node_heartbeat_pir_log.csv,REAL_DEVICE,8399,node heartbeat and PIR log,Heartbeat every ~10 s; motion_detected (PIR) is empty for older rows
+actuator_log.csv,REAL_DEVICE,560,actuator activity log,State-change events for valve/door/buzzer/led; most rows come from scheduled functional tests on 2026-10-20 (reason is inferred by firmware)
 historical_db_telemetry_29k.csv,REAL_DEVICE,34594,sensor acquisition dataset,Dump of sensor_telemetry from live PostgreSQL 2026-09-16..2026-10-16; humidity empty (BMP280 has none)
-historical_db_node_logs.csv,REAL_DEVICE,32039,device and actuator activity log,Remote syslog from ESP32 nodes
+historical_db_node_logs.csv,REAL_DEVICE,32039,device syslog,Heartbeat/OTA/I2C scan messages only; no actuator events
 historical_db_alerts.csv,REAL_DEVICE,118,consensus alert history,Epicenter equals node coordinates and velocity/time_diff are 0 in sampled row; verify before citing
 ai_historical_features.csv,DERIVED_FROM_REAL,33048,AI features,10 s windows from historical_db_telemetry_29k.csv
 historical_db_grouped_by_event.csv,DERIVED_FROM_REAL,34594,episode segmentation,Telemetry plus event_id and event_phase
