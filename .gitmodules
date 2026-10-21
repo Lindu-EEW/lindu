@@ -7,3 +7,9 @@
 [submodule "prototype/grafana-stack"]
 	path = prototype/grafana-stack
 	url = https://github.com/Lindu-EEW/lindu_grafana.git
+[submodule "lindu_node"]
+	path = lindu_node
+	url = https://github.com/Lindu-EEW/lindu_node.git
+[submodule "lindu_server"]
+	path = lindu_server
+	url = https://github.com/Lindu-EEW/lindu_server.git
