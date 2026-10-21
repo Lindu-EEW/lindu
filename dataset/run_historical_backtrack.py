@@ -87,10 +87,10 @@ def run_backtrack_audit():
     print("🌍 3. SISTEM BACKTRACKING SEISMOLOGI (STUDI KASUS GEMPA ASLI CHIBA M4.0)")
     print("=" * 85)
 
-    # Verifikasi dengan JMA
-    station_lat, station_lon = 35.5402, 139.5178 # Center Node Lindu
-    jma_lat, jma_lon, jma_depth = 35.7000, 140.1000, 70.0 # Northwestern Chiba
-    jma_origin_str = "10:04:34 JST"
+    # Verifikasi dengan JMA & Koordinat Presisi Pengguna
+    station_lat, station_lon = 35.5402112, 139.5178194 # Center Node Lindu (Yokohama)
+    jma_lat, jma_lon, jma_depth = 35.8000, 140.1000, 70.0 # Northwestern Chiba (35.8°N, 140.1°E, Kedalaman 70 km)
+    jma_origin_str = "10:04:34.0 JST"
     measured_arrival_str = "10:04:48.005 JST"
     measured_arrival_sec = 48.005
 
