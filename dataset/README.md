@@ -85,10 +85,28 @@ One row is written each time an actuator changes state. The firmware publishes t
 
 Coverage: the LED logs the alarm mode only, not its colour or blink pattern; the buzzer logs the siren only, not the short haptic ticks. The rows come from functional tests (door and valve cycles, simulated earthquake alarms), not from natural events.
 
+### 1.4 Verified Real Earthquakes (Field Measurements Correlated with Official Reports)
+
+Real tectonic ground motion measured by the physical ESP32 prototype nodes and cross-verified against official meteorological agency catalogs (JMA / BMKG).
+
+| File | Rows | Description |
+|---|---:|---|
+| [`verified_real_events.csv`](verified_real_events.csv) | 1 | Master catalog of ground-truth tectonic earthquakes recorded live by the network |
+| [`real_earthquake_chiba_m4_20261021.csv`](real_earthquake_chiba_m4_20261021.csv) | 179 | Full 3-node triaxial time-series of the **Northwestern Chiba Prefecture M4.0** earthquake (2026-10-21 10:04 JST) |
+| [`real_earthquake_chiba_m4_20261021.json`](real_earthquake_chiba_m4_20261021.json) | 179 | JSON format containing JMA event metadata (Event ID `20261021100944`), physical metrics, and phase segmentation |
+
+**Verified Event Highlights (Chiba M4.0 - 2026-10-21):**
+- **Official JMA Report**: Event ID `20261021100944`, Northwestern Chiba Prefecture, M4.0, Depth 70 km, Max Intensity Shindo 2.
+- **Physical Onset**: `10:04:48 JST` (01:04:48 UTC) detected on `node_acbd13f9`.
+- **Tri-Node Quorum**: `10:04:52 JST` (01:04:52 UTC) simultaneous 3-node P-wave detection ($PGA \ge 0.0035g$).
+- **Peak S-Wave Shaking**: `10:04:58 JST` ($PGA = 0.00897g \approx 0.009g$, max instantaneous $0.00954g$).
+- **P-to-S Lead Time**: **10.00 seconds** (P-wave onset to peak S-wave arrival).
+- **Total Shaking Duration**: **49.12 seconds** (elevated ground motion ending at `10:05:37 JST`).
+
 | Dataset File | Rows | Format | Description |
 |---|:---:|---|---|
-| [`historical_db_grouped_by_event.csv`](file:///Users/likotjhang/Library/CloudStorage/GoogleDrive-eaprilitrisno@gmail.com/My%20Drive/Documents/Indonesia/Eko%20-%20Master/Semester%201/IOT%20-%20Suryadiputra%20Liawatimena/Project%20Group%209/Idea%201%20-%20Eearthquake%20Warning/dataset/historical_db_grouped_by_event.csv) | **34,594** | CSV | Telemetry with `event_id`, `event_phase` (`PRE_SHOCK`, `P_WAVE_ONSET`, `S_WAVE_PEAK`, `CODA_DECAY`), and `seconds_from_onset`. |
-| [`historical_earthquake_episodes_index.csv`](file:///Users/likotjhang/Library/CloudStorage/GoogleDrive-eaprilitrisno@gmail.com/My%20Drive/Documents/Indonesia/Eko%20-%20Master/Semester%201/IOT%20-%20Suryadiputra%20Liawatimena/Project%20Group%209/Idea%201%20-%20Eearthquake%20Warning/dataset/historical_earthquake_episodes_index.csv) | **1,255** | CSV | **Catalog of 1,255 distinct episodes** (117 Multi-Node Earthquakes, 1,138 Local Disturbances) with peak PGA, lead time, and actuator outcomes. |
+| [`historical_db_grouped_by_event.csv`](file:///Users/likotjhang/Library/CloudStorage/GoogleDrive-eaprilitrisno@gmail.com/My%20Drive/Documents/Indonesia/Eko%20-%20Master/Semester%201/IOT%20-%20Suryadiputra%20Liawatimena/Project%20Group%209/Idea%201%20-%20Eearthquake%20Warning/dataset/historical_db_grouped_by_event.csv) | **34,773** | CSV | Telemetry with `event_id`, `event_phase` (`PRE_SHOCK`, `P_WAVE_ONSET`, `S_WAVE_PEAK`, `CODA_DECAY`), and `seconds_from_onset`. |
+| [`historical_earthquake_episodes_index.csv`](file:///Users/likotjhang/Library/CloudStorage/GoogleDrive-eaprilitrisno@gmail.com/My%20Drive/Documents/Indonesia/Eko%20-%20Master/Semester%201/IOT%20-%20Suryadiputra%20Liawatimena/Project%20Group%209/Idea%201%20-%20Eearthquake%20Warning/dataset/historical_earthquake_episodes_index.csv) | **1,256** | CSV | **Catalog of 1,256 distinct episodes** (including verified real earthquakes, multi-node quakes, and controls). |
 | [`update_historical_episodes_from_db.py`](file:///Users/likotjhang/Library/CloudStorage/GoogleDrive-eaprilitrisno@gmail.com/My%20Drive/Documents/Indonesia/Eko%20-%20Master/Semester%201/IOT%20-%20Suryadiputra%20Liawatimena/Project%20Group%209/Idea%201%20-%20Eearthquake%20Warning/dataset/update_historical_episodes_from_db.py) | — | Python | Segmentation script detecting wave arrivals, spatial agreement, and clustering time windows directly from live TimescaleDB. |
 | [`train_prediction_model.py`](file:///Users/likotjhang/Library/CloudStorage/GoogleDrive-eaprilitrisno@gmail.com/My%20Drive/Documents/Indonesia/Eko%20-%20Master/Semester%201/IOT%20-%20Suryadiputra%20Liawatimena/Project%20Group%209/Idea%201%20-%20Eearthquake%20Warning/dataset/train_prediction_model.py) | — | Python | Predictive model achieving **98.8% Accuracy** and **96.5% Recall** across all 1,255 real physical episodes. |
 

@@ -4,6 +4,9 @@ actuator_log.csv,REAL_DEVICE,560,actuator activity log,State-change events for v
 historical_db_telemetry_29k.csv,REAL_DEVICE,34594,sensor acquisition dataset,Dump of sensor_telemetry from live PostgreSQL 2026-09-16..2026-10-16; humidity empty (BMP280 has none)
 historical_db_node_logs.csv,REAL_DEVICE,32039,device syslog,Heartbeat/OTA/I2C scan messages only; no actuator events
 historical_db_alerts.csv,REAL_DEVICE,118,consensus alert history,Epicenter equals node coordinates and velocity/time_diff are 0 in sampled row; verify before citing
+verified_real_events.csv,REAL_DEVICE,1,verified real earthquake catalog,Ground-truth real tectonic earthquakes recorded by prototype nodes and matched with official agencies (JMA/BMKG)
+real_earthquake_chiba_m4_20261021.csv,REAL_DEVICE,179,real earthquake raw telemetry,Full 3-node triaxial recording of Northwestern Chiba M4.0 (2026-10-21 10:04 JST) with P-wave, S-wave, and coda decay
+real_earthquake_chiba_m4_20261021.json,REAL_DEVICE,179,real earthquake raw telemetry and JMA metadata,JSON format with JMA event metadata and triaxial timeseries
 ai_historical_features.csv,DERIVED_FROM_REAL,33048,AI features,10 s windows from historical_db_telemetry_29k.csv
 historical_db_grouped_by_event.csv,DERIVED_FROM_REAL,34594,episode segmentation,Telemetry plus event_id and event_phase
 historical_earthquake_episodes_index.csv,DERIVED_FROM_REAL,637,episode catalog,103 multi-node earthquakes and 534 local disturbances

@@ -1,0 +1,2 @@
+event_id,jma_event_id,region,jma_magnitude,jma_max_intensity,jma_depth_km,origin_time_jst,lindu_onset_jst,lindu_peak_jst,lindu_coda_end_jst,shaking_duration_sec,lead_time_sec,peak_pga_g,participating_nodes,node_count,verification_source
+EQ_VERIFIED_JMA_20261021_CHIBA,20261021100944,Northwestern Chiba Prefecture,4.0,Shindo 2,70,2026-10-21 10:04:00+09,2026-10-21 10:04:48,2026-10-21 10:04:58,2026-10-21 10:05:37,49.12,10.0,0.008966,node_2418399e;node_3c096f0c;node_acbd13f9,3,https://www.data.jma.go.jp/multi/quake/quake_detail.html?eventID=20261021100944&lang=en
