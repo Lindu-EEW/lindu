@@ -217,12 +217,13 @@ def check_grafana_dashboard_queries():
 
         if p2:
             sql2 = p2.get("targets", [{}])[0].get("rawSql", "")
-            legend_calcs = p2.get("options", {}).get("legend", {}).get("calcs", [])
-            if "time_bucket('1s'" in sql2:
-                report_pass("Panel 2 Seismogram (Anchored Time Bucket)", "Menggunakan time_bucket('1s', ts) -> Data historis KONSISTEN & DIAM")
+            if "time_bucket('500ms'" in sql2 or "time_bucket('1s'" in sql2:
+                bucket_str = "500ms" if "500ms" in sql2 else "1s"
+                report_pass(f"Panel 2 Seismogram (Anchored {bucket_str} Bucket)", f"Menggunakan time_bucket('{bucket_str}', ts) -> Data historis KONSISTEN & DIAM")
             else:
-                report_fail("Panel 2 Seismogram", "Belum menggunakan time_bucket('1s')! Gelombang historis akan melompat-lompat.")
+                report_fail("Panel 2 Seismogram", "Belum menggunakan time_bucket! Gelombang historis akan melompat-lompat.")
 
+            legend_calcs = p2.get("options", {}).get("legend", {}).get("calcs", [])
             if "mean" in legend_calcs and "max" in legend_calcs:
                 report_pass("Panel 2 Legend Matrix", f"Menampilkan {legend_calcs} -> Transparan antara Last, Mean, dan Peak Max")
             else:
@@ -230,10 +231,11 @@ def check_grafana_dashboard_queries():
 
         if p3:
             sql3 = p3.get("targets", [{}])[0].get("rawSql", "")
-            if "time_bucket('1s'" in sql3:
-                report_pass("Panel 3 STA/LTA (Anchored Time Bucket)", "Menggunakan time_bucket('1s', ts) -> Grafik trigger tidak berubah di masa lalu")
+            if "time_bucket('500ms'" in sql3 or "time_bucket('1s'" in sql3:
+                bucket_str = "500ms" if "500ms" in sql3 else "1s"
+                report_pass(f"Panel 3 STA/LTA (Anchored {bucket_str} Bucket)", f"Menggunakan time_bucket('{bucket_str}', ts) -> Grafik trigger tidak berubah di masa lalu")
             else:
-                report_warn("Panel 3 STA/LTA", "Query belum di-bucket dengan time_bucket('1s')")
+                report_warn("Panel 3 STA/LTA", "Query belum di-bucket dengan time_bucket")
 
         if p20:
             sql20 = p20.get("targets", [{}])[0].get("rawSql", "")
